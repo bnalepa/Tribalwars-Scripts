@@ -1,0 +1,122 @@
+// ==UserScript==
+// @name         Przesyłanie ataków
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @match        https://*.plemiona.pl/*mode=incomings*
+// ==/UserScript==
+/*
+{
+    "defender_x": null,
+    "defender_y": null,
+    "attacker_x": null,
+    "attacker_y": null,
+    "attack_type": "",
+    "entry_time": null,
+    "send_time": null,
+    "defender_name": "",
+    "attacker_name": ""
+}
+*/
+/*var a=$("#incomings_table")[0].children[1].children[$("#incomings_table")[0].children[1].children.length-1].children[1].appendChild(document.createElement('input'));
+a.className='btn';
+a.value='Eksportuj ataki';
+a.size=11;
+a.addEventListener('click',send);
+function send()
+{
+    */
+var ataki;
+/*body: `{
+    "defender_cords": "222|222",
+    "attacker_cords": "111|111",
+    "distance": "10.0",
+    "attack_type": "Taran",
+    "entry_time": "2021-09-25T23:52:00Z",
+    "defender_name": "def",
+    "attacker_name": "off"
+} `,
+*/
+try {
+    ataki = $("#incomings_table")[0].getElementsByClassName("nowrap").length;
+} catch (err) {
+    ataki = 0;
+}
+
+if( ataki > 0 )
+{
+var names=[
+    "attack_type",
+    "defender_cords",
+    "attacker_cords",
+    "attacker_name",
+    "distance",
+    "entry_time",
+    "defender_name"
+];
+
+var tab=[];
+for(var i=1;i<$("#incomings_table")[0].children[1].children.length-1;i++)
+{
+tab[i]=[];
+//etykieta
+tab[i][0]=$(".quickedit-label")[i-1].innerText.trim();
+//wioska obrońcy
+var str=$("#incomings_table")[0].children[1].children[i].children[1].innerText;
+tab[i][1]=str.substr(str.indexOf("(")+1,7);
+//wioska agresora
+str=$("#incomings_table")[0].children[1].children[i].children[2].innerText;
+tab[i][2]=str.substr(str.indexOf("(")+1,7);
+//agresor
+tab[i][3]=$("#incomings_table")[0].children[1].children[i].children[3].innerText;
+//odleglość
+tab[i][4]=$("#incomings_table")[0].children[1].children[i].children[4].innerText;
+//data
+str=$("#incomings_table")[0].children[1].children[i].children[5].innerText;
+var date=$("#serverDate")[0].innerText.split("/");
+var data = new Date(parseInt(date[2]),date[1]-1,date[0])
+switch(str.substr(0,str.indexOf("o"))){
+case 'jutr':
+data.setDate(data.getDate() + 1);
+var day=data.getDate();
+break;
+case 'dzisiaj ':
+day=data.getDate();
+break;
+default:
+day=parseInt(str.substr(5,2));
+break;
+}
+var month=data.getMonth()+1;
+var year=data.getYear()+1900;
+tab[i][5]=year+"-"+month+"-"+day+"T"+str.substr(str.indexOf(" o ")+3,8)+"Z";
+}
+var end;
+var player=$("#menu_row")[0].children[10].children[1].children[0].children[0].children[0].children[0].innerHTML;
+for(var i=1;i<tab.length;i++)
+{
+end = '{ ';
+for(var j=0;j<6;j++)
+{
+end+= ' "'+names[j]+'": "'+tab[i][j]+'",';
+}
+end+= ' "'+names[6]+'": "'+player+'"';
+end += "}";
+console.log(end);
+
+var response = await fetch("https://wariat169.herokuapp.com/api/attacks/", {
+method: 'POST',
+headers: {
+  'Accept': 'application/json',
+  'Content-Type': 'application/json'
+},
+body: end,
+});
+
+
+response.json().then(data => {
+ console.log(data);
+
+});
+}
+
+}

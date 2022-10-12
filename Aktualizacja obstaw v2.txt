@@ -1,0 +1,35 @@
+javascript:
+//[table]
+//[**]Lp.[||]współrzędne[||]Do wysłania[||]Wysłane[||]Notatki[/**]
+//[*]1.[|] 586|574 [|]60[|]10[|] Bez zwiadu
+//[*]2.[|] 585|574 [|]80[|]0[|]
+//[/table]
+
+a=$("table.vis.bbcodetable").children().children()
+tab=[]
+tab_players=''
+for(var i=1;i<=a.length-1;i++)
+{    
+    tab[i]=[]
+    tab[i][0]=a[i].children[1].innerText.slice(a[i].children[1].innerText.search(/[0-9]{3}\|[0-9]{3}\)\sK[0-9]{2}/),a[i].children[1].innerText.search(/[0-9]{3}\|[0-9]{3}\)\sK[0-9]{2}/)+7).trim()
+    tab[i][1]=parseInt(a[i].children[2].innerText)
+    tab[i][2]=parseInt(a[i].children[3].innerText)
+    tab[i][3]=a[i].children[4].innerText
+}
+for(var j=1;j<$(".text").length;j++)
+{
+    player=$(".postheader_left a")[j].innerText.trim();
+    packs=0;
+    for(var i=0;i<$(".text")[j].innerHTML.split("<br>").length;i++)
+    {
+    packs+=parseInt($(".text")[j].innerHTML.split("<br>")[i].trim().slice($(".text")[j].innerHTML.split("<br>")[i].trim().search(/\+/)+1,$(".text")[j].innerHTML.split("<br>")[i].trim().search(/\=/)))
+    tab[$(".text")[j].innerHTML.split("<br>")[i].trim().slice(0,$(".text")[j].innerHTML.split("<br>")[0].trim().search(/\./))][2]+=parseInt($(".text")[j].innerHTML.split("<br>")[i].trim().slice($(".text")[j].innerHTML.split("<br>")[i].trim().search(/\+/)+1,$(".text")[j].innerHTML.split("<br>")[i].trim().search(/\=/)))
+    }
+    tab_players+=player+":"+packs+";";
+}
+text='';
+for(i=1;i<tab.length;i++)
+{
+    text+="[*]"+i+".[|] "+tab[i][0]+" [|] "+tab[i][1]+" [|] "+tab[i][2]+" [|] "+tab[i][3]
+}
+Dialog.show("window","Wioski do wklejenia:<br><textarea cols=50 rows=18>"+text+"</textarea><br>Obstawy od graczy<br><textarea cols=50 rows=8>"+tab_players);

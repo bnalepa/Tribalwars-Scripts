@@ -1,0 +1,23 @@
+javascript:
+
+plemiona = ["Alfa", "Beta", "Gamma", "HUS", "HUS.", "PałA"];
+
+iloscWiosek = $("table#units_table>tbody>tr").length;
+wsparcia=0;
+
+
+for(i=0;i<iloscWiosek;i++)
+{
+zmienna=$("table#units_table>tbody>tr")[i].cells[0].getElementsByTagName("a");
+if(zmienna.length==4)
+{
+plemie=zmienna[3].innerHTML;
+
+for(j=0;j<plemiona.length;j++)
+{
+if(plemiona[j]==plemie)
+{ 
+wsparcia++;
+}
+}}}
+UI.InfoMessage("Ilość wsparć u wroga: "+wsparcia)

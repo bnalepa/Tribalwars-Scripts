@@ -1,0 +1,82 @@
+javascript:list = []
+units = []
+fullName = []
+players=[]
+myVillages=[]
+notMyVillages=[]
+ for(j=0;j<$("#units_table")[0].children[1].children.length-2;j++)
+        {
+if($("#units_table")[0].children[1].children[j].className!=" units_away"&&$("#units_table")[0].children[1].children[j].className!="selected units_away")
+{
+a=$("#units_table")[0].children[1].children[j].children[0].children[0].children[1].children[0].innerHTML
+b= a.indexOf(") K")
+coord= a.substr(b-7,7)
+onList=false;
+    for(i=0;i<list.length;i++)
+        {
+            if(list[i]==coord)
+            { 
+                onList=true;
+                id=i;
+            }
+               
+        }
+if(!onList)
+{
+    id=list.length;
+    list[id]=coord;
+    fullName[id]=[];
+    fullName[id][0]=$("#units_table")[0].children[1].children[j].children[0].children[0].children[1].children[0].innerHTML.trim();
+    fullName[id][1]=$("#units_table")[0].children[1].children[j].children[0].children[0].children[1].children[0].href;
+                units[id]=[];
+    // gracz
+    players[id]=[]
+if($("#units_table")[0].children[1].children[j].children[0].children[0].children.length==4)
+{
+    players[id][0]=$("#units_table")[0].children[1].children[j].children[0].children[0].children[2].innerHTML;
+    players[id][1]=$("#units_table")[0].children[1].children[j].children[0].children[0].children[2].href;   
+    notMyVillages[notMyVillages.length]=id;
+} else {
+    
+
+    players[id][0]=$("#menu_row")[0].children[10].children[1].children[0].children[0].children[0].children[0].innerHTML;
+    players[id][1]=$("#menu_row")[0].children[10].children[1].children[0].children[0].children[0].children[0].href;
+    myVillages[myVillages.length]=id;
+}
+
+                for(z=2;z<$("#units_table")[0].children[1].children[j].children.length-1;z++)
+                    {
+                        units[id][z-2]=parseInt($("#units_table")[0].children[1].children[j].children[z].innerText)
+                    }
+} else {
+for(z=2;z<$("#units_table")[0].children[1].children[j].children.length-1;z++)
+    {
+        units[id][z-2]+=parseInt($("#units_table")[0].children[1].children[j].children[z].innerText)
+    }
+}
+}
+        }
+child = document.createElement('tbody')
+$("#units_table")[0].prepend(child)
+
+for(z=0;z<myVillages.length;z++)
+    {
+    i=myVillages[z];
+child = document.createElement('tr')
+units_sub="";
+    for(j=0;j<units[i].length;j++)
+    units_sub+="<td>"+units[i][j]+"</td>"
+child.innerHTML="<td><a href='"+fullName[i][1]+"'>"+fullName[i][0]+"</a></td><td><a href='"+players[i][1]+"'>"+players[i][0]+"</a></td>"+units_sub
+$("#units_table")[0].prepend(child) 
+    }
+
+for(z=0;z<notMyVillages.length;z++)
+    {
+    i=notMyVillages[z];
+child = document.createElement('tr')
+units_sub="";
+    for(j=0;j<units[i].length;j++)
+    units_sub+="<td>"+units[i][j]+"</td>"
+child.innerHTML="<td><a href='"+fullName[i][1]+"'>"+fullName[i][0]+"</a></td><td><a href='"+players[i][1]+"'>"+players[i][0]+"</a></td>"+units_sub
+$("#units_table")[0].prepend(child) 
+    }

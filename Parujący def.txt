@@ -1,0 +1,25 @@
+javascript:
+  if ((game_data.screen !== 'report') || ((window.location.href.match("view") == null))) {
+        UI.InfoMessage("WejdĹş w raport i dopiero uruchom skrypt!", 2000, 'error');
+    } else {
+komunikat="Użyto błędny raport";
+            if ($("table#attack_info_att")[0].rows[0].cells[1].getElementsByTagName('a')[0].innerHTML == game_data.player.name) {
+var tekst="";
+komunikat="Dodano wyparowany def";
+if(($("span.quickedit-label")[0].innerHTML).indexOf("podbija")!=-1)
+{
+for(i=2;i<$("span.village_anchor.contexted").length;i++)
+{
+tekst = "";
+wioska=$("span.village_anchor.contexted")[i].getAttribute("data-id");
+var cowyslal = $("table#attack_away_units")[0].rows[i-1];
+tekst += "\nWyparowało:\t" + cowyslal.cells[1].innerHTML + "\t" + cowyslal.cells[2].innerHTML + "\t" + cowyslal.cells[3].innerHTML + "\t" + cowyslal.cells[4].innerHTML + "\t" + cowyslal.cells[5].innerHTML + "\t" + cowyslal.cells[6].innerHTML + "\t" + cowyslal.cells[7].innerHTML + "\t" + cowyslal.cells[8].innerHTML + "\t" + cowyslal.cells[9].innerHTML + "\t" + cowyslal.cells[10].innerHTML + "\t" + cowyslal.cells[11].innerHTML + "\t" + cowyslal.cells[12].innerHTML + "\t";
+console.log(tekst);
+TribalWars.post('info_village', {
+                ajaxaction: 'edit_notes',
+                id: wioska
+            }, {
+                note: tekst
+            });
+} UI.InfoMessage(komunikat, 2000, );
+}}};

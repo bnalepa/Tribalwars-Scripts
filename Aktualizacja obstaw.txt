@@ -1,0 +1,46 @@
+javascript:
+var a=prompt("podaj obstawy").split(";");
+var tab=[]
+for(i=0;i<a.length-1;i++)
+{
+    state=0
+    for(j=0;j<tab.length;j+=2)
+    {
+        if(tab[j]==a[i].split(":")[0])
+        {
+           tab[j+1]=parseInt(tab[j+1])+parseInt(a[i].split(":")[1])
+           state=1
+        }
+    }
+    if(state==0)
+    {
+       tab.push(a[i].split(":")[0])
+       tab.push(a[i].split(":")[1])
+    }
+}
+
+tab_sort=[]
+for(i=0;i<tab.length;i+=2)
+{
+    max=0
+    index=0
+    for(j=0;j<tab.length;j+=2)
+    {
+        if(max<parseInt(tab[j+1]))
+        {
+            index=j
+            max=parseInt(tab[j+1])
+        }
+    }
+    tab_sort.push(tab[index])
+    tab_sort.push(tab[index+1])
+    tab[index+1]=0
+}
+var text="[table]\n[**]Lp.[||]Gracz[||]Wysłane paczki[/**]\n"
+
+for(i=0;i<tab_sort.length;i+=2)
+{    
+    text+="[*]"+(i/2+1)+".[|][player]"+tab_sort[i]+"[/player][|] "+tab_sort[i+1]+"\n";
+}
+text+="[/table]"
+Dialog.show("window","<textarea cols=50 rows=18>"+text+"</textarea>");

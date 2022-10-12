@@ -1,0 +1,22 @@
+javascript:
+//by Foxtal
+$("#buildings")[0].children[0].children[0].innerHTML+="<font size=1>Opłacalne, jeśli surka<br>na giełdzie jest tańsza niż:"
+for(var i=1;i<$("#buildings")[0].children[0].children.length;i++)
+{
+    a=$("#buildings")[0].children[0].children[i];    
+    if(a.children.length>2)
+    { suma=parseInt((parseInt(a.children[1].innerText)+parseInt(a.children[2].innerText)+parseInt(a.children[3].innerText))*0.2);
+a.innerHTML+="<font size=1>"+parseInt(suma/30)+" za 1 PP</font>";
+    }
+}
+*/
+javascript:
+//by Foxtal
+const buildings = $("#buildings")[0].children[0].children;
+buildings[0].innerHTML += "<font size=1>Opłacalne, jeśli surka<br>na giełdzie jest tańsza niż:"
+for (let building of buildings) {
+    if (building.children.length > 2) {
+        suma = parseInt((parseInt(building.children[1].innerText) + parseInt(building.children[2].innerText) + parseInt(building.children[3].innerText)) * 0.2);
+        building.innerHTML += "<font size=1>" + parseInt(suma / 30) + " za 1 PP</font>";
+    }
+};
