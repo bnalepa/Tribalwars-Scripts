@@ -1,16 +1,20 @@
-var temp;
 var actualTime = new Date(Date.now());
-var endTime = new Date(2022,11,10)
+var endTime = new Date(2022,11,10);
 var remaningTime = endTime.getTime() - actualTime.getTime();
+var weekLeft = parseInt(remaningTime/1000/60/60/24/7);
+remaningTime -= weekLeft*1000*60*60*24*7;
 var daysLeft = parseInt(remaningTime/1000/60/60/24);
-var hoursLeft = parseInt(remaningTime-daysLeft/1000/60/60-daysLeft*1000/60/60/24);
-var minutesLeft = parseInt(remaningTime/1000/60-hoursLeft*1000/60/60);
-var secondsLeft = parseInt(remaningTime/1000-minutesLeft*1000/60);
+remaningTime -= daysLeft*1000*60*60*24;
+var hoursLeft = parseInt(remaningTime/1000/60/60);
+remaningTime -= hoursLeft*1000*60*60;
+var minutesLeft = parseInt(remaningTime/1000/60);
+remaningTime -= minutesLeft*1000*60;
+var secondsLeft = parseInt(remaningTime/1000);
 
 function f()
 {
     
-    console.log("Do X pozostało: "+ daysLeft + " dni " + hoursLeft + " godzin " + minutesLeft + " minut " + secondsLeft + " sekund " );
+    console.log("Do X pozostało: "+ weekLeft + " tygodni " + daysLeft + " dni " + hoursLeft + " godzin " + minutesLeft + " minut " + secondsLeft + " sekund " );
     
     secondsLeft--;
 }
