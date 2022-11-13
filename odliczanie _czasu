@@ -17,5 +17,25 @@ function f()
     console.log("Do X pozostało: "+ weekLeft + " tygodni " + daysLeft + " dni " + hoursLeft + " godzin " + minutesLeft + " minut " + secondsLeft + " sekund " );
     
     secondsLeft--;
+    if(secondsLeft==-1)
+    {
+       secondsLeft=59;
+        minutesLeft--;
+         if(minutesLeft==-1)
+         {
+            minutesLeft=59;
+            hoursLeft--;
+             if(hoursLeft==-1)
+             {
+                hoursLeft=23;
+                daysLeft--;
+                 if(daysLeft==-1)
+                 {
+                    daysLeft=6;
+                    weekLeft--;
+                 }
+             }
+         }
+    }
 }
 setInterval(f,1000);
