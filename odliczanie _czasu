@@ -59,3 +59,9 @@ setInterval(f,1000);
     text-align: center;
     border-radius: 3px;"> Do X pozostało: 3 tygodni 5 dni 9 godzin 14 minut 35 sekund
 </div>
+
+
+var el = document.createElement('div');
+el.innerHTML='<div style="  width: 350px;height: 400x; border: 1px solid #603000;background-color: #E9D0A9;position: fixed;bottom:50px;left:0px;text-align: center;border-radius: 3px;"> Do X pozostało: 3 tygodni 5 dni 9 godzin 14 minut 35 sekund</div>'
+box = document.getElementById('js-flash-container');
+box.appendChild(el);
