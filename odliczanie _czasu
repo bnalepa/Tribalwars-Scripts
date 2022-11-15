@@ -1,5 +1,9 @@
+// FORMAT DATY "DD.MM.RRRR"
+var data = "17.12.2022";
+//
+data = data.split(".");
 var actualTime = new Date(Date.now());
-var endTime = new Date(2022,11,10);
+var endTime = new Date(parseInt(data[2]),parseInt(data[1])-1,parseInt(data[0]));
 var remaningTime = endTime.getTime() - actualTime.getTime();
 var weekLeft = parseInt(remaningTime/1000/60/60/24/7);
 remaningTime -= weekLeft*1000*60*60*24*7;
