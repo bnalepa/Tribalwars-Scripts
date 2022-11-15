@@ -44,7 +44,7 @@ setInterval(f,1000);
 
 
 
-<div class="quest" style="  
+<div style="  
      width: 350px;
     height: 400x; 
     border: 1px solid #603000;
