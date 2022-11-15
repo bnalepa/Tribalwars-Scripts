@@ -1,6 +1,14 @@
 // FORMAT DATY "DD.MM.RRRR"
 var data = "17.12.2022";
 //
+
+
+var el = document.createElement('div');
+el.innerHTML='<div id="remaningTime" style="width: 350px;height: 400x; border: 1px solid #603000;background-color: #E9D0A9;position: fixed;bottom:50px;left:0px;text-align: center;border-radius: 3px;"> Do X pozostało: 3 tygodni 5 dni 9 godzin 14 minut 35 sekund</div>';
+box = document.getElementById('js-flash-container');
+box.appendChild(el);
+
+
 data = data.split(".");
 var actualTime = new Date(Date.now());
 var endTime = new Date(parseInt(data[2]),parseInt(data[1])-1,parseInt(data[0]));
@@ -18,7 +26,9 @@ var secondsLeft = parseInt(remaningTime/1000);
 function f()
 {
     
-    console.log("Do X pozostało: "+ weekLeft + " tygodni " + daysLeft + " dni " + hoursLeft + " godzin " + minutesLeft + " minut " + secondsLeft + " sekund " );
+    //console.log("Do X pozostało: "+ weekLeft + " tygodni " + daysLeft + " dni " + hoursLeft + " godzin " + minutesLeft + " minut " + secondsLeft + " sekund " );
+    $("#remaningTime").innerHTML="Do X pozostało: "+ weekLeft + " tygodni " + daysLeft + " dni " + hoursLeft + " godzin " + minutesLeft + " minut " + secondsLeft + " sekund";
+    
     
     secondsLeft--;
     if(secondsLeft==-1)
@@ -43,25 +53,3 @@ function f()
     }
 }
 setInterval(f,1000);
-
-
-
-
-
-<div style="  
-     width: 350px;
-    height: 400x; 
-    border: 1px solid #603000;
-    background-color: #E9D0A9;
-    position: fixed;
-    bottom:50px;
-    left:0px;
-    text-align: center;
-    border-radius: 3px;"> Do X pozostało: 3 tygodni 5 dni 9 godzin 14 minut 35 sekund
-</div>
-
-
-var el = document.createElement('div');
-el.innerHTML='<div style="  width: 350px;height: 400x; border: 1px solid #603000;background-color: #E9D0A9;position: fixed;bottom:50px;left:0px;text-align: center;border-radius: 3px;"> Do X pozostało: 3 tygodni 5 dni 9 godzin 14 minut 35 sekund</div>'
-box = document.getElementById('js-flash-container');
-box.appendChild(el);
