@@ -1,5 +1,5 @@
-Skrypty do plemiona.pl 
+Skrypty do strony "plemiona.pl". 
 Opisy skryptów dostępne są na górze poszczególnych plików.
 Krótka legenda:
-[TM] - skrypt do tapermonkeya
+[TM] - skrypt do tapermonkeya,
 [PS] - skrypt do paska skrótów
