@@ -2,7 +2,7 @@
 // @name         Odliczanie czasu
 // @namespace    http://tampermonkey.net/
 // @version      1.0
-// @description  Odliczanie czasu do podanej daty
+// @description  Odliczanie czasu do podanej daty. Ustawienie odliczanej daty w 15 linii. 
 // @author       Foxtal
 // @match        https://*.plemiona.pl/game.php*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
