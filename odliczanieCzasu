@@ -11,7 +11,7 @@
 
 (function() {
 
-// FORMAT DATY "DD.MM.RRRR"
+// FORMAT DATY "DD-MM-RRRR"
 var inputDate = "17-12-2022";
 /////////////////////////////
 
