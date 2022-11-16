@@ -11,7 +11,6 @@
 
 (function() {
 
-
 // FORMAT DATY "DD.MM.RRRR"
 var inputDate = "17-12-2022";
 /////////////////////////////
@@ -41,8 +40,6 @@ function f()
 {
 
     $("#remaningTime")[0].innerHTML = "Do " + inputDate + " pozostało: "+ weekLeft + " tygodni " + daysLeft + " dni " + hoursLeft + " godzin " + minutesLeft + " minut " + secondsLeft + " sekund";
-
-
     secondsLeft--;
     if(secondsLeft==-1)
     {
