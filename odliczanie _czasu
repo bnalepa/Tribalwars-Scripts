@@ -1,16 +1,30 @@
+// ==UserScript==
+// @name         Odliczanie czasu
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Odliczanie czasu do podanej daty
+// @author       Foxtal
+// @match        https://*.plemiona.pl/game.php*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
+// @grant        none
+// ==/UserScript==
+
+(function() {
+
+
 // FORMAT DATY "DD.MM.RRRR"
-var inputData = "17-12-2022";
-//
+var inputDate = "17-12-2022";
+/////////////////////////////
 
 var el = document.createElement('div');
 el.innerHTML='<div id="remaningTime" style="width: 350px; height: 400x; border: 1px solid #603000; background-color: #E9D0A9;position: fixed; bottom: 30px; left:0px; text-align: center; border-radius: 3px;">3 tygodni 5 dni 9 godzin 14 minut 35 sekund</div>';
-box = document.getElementById('ds_body');
+var box = document.getElementById('ds_body');
 box.appendChild(el);
 
 
-var data = inputData.split("-");
+var date = inputDate.split("-");
 var actualTime = new Date(Date.now());
-var endTime = new Date(parseInt(data[2]),parseInt(data[1])-1,parseInt(data[0]));
+var endTime = new Date(parseInt(date[2]),parseInt(date[1])-1,parseInt(date[0]));
 var remaningTime = endTime.getTime() - actualTime.getTime();
 var weekLeft = parseInt(remaningTime/1000/60/60/24/7);
 remaningTime -= weekLeft*1000*60*60*24*7;
@@ -25,16 +39,16 @@ f();
 
 function f()
 {
-    
-    $("#remaningTime")[0].innerHTML = "Do " + inputData + " pozostało: "+ weekLeft + " tygodni " + daysLeft + " dni " + hoursLeft + " godzin " + minutesLeft + " minut " + secondsLeft + " sekund";
-    
-    
+
+    $("#remaningTime")[0].innerHTML = "Do " + inputDate + " pozostało: "+ weekLeft + " tygodni " + daysLeft + " dni " + hoursLeft + " godzin " + minutesLeft + " minut " + secondsLeft + " sekund";
+
+
     secondsLeft--;
     if(secondsLeft==-1)
     {
        secondsLeft=59;
         minutesLeft--;
-         if(minutesLeft==-1)
+        if(minutesLeft==-1)
          {
             minutesLeft=59;
             hoursLeft--;
@@ -52,3 +66,4 @@ function f()
     }
     }
 setInterval(f,1000);
+})();
