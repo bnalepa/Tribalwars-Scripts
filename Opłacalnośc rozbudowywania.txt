@@ -9,6 +9,9 @@ for(var i=1;i<$("#buildings")[0].children[0].children.length;i++)
 a.innerHTML+="<font size=1>"+parseInt(suma/30)+" za 1 PP</font>";
     }
 }
+
+
+
 */
 javascript:
 //by Foxtal
@@ -19,4 +22,5 @@ for (let building of buildings) {
         suma = parseInt((parseInt(building.children[1].innerText) + parseInt(building.children[2].innerText) + parseInt(building.children[3].innerText)) * 0.2);
         building.innerHTML += "<font size=1>" + parseInt(suma / 30) + " za 1 PP</font>";
     }
+    
 };
