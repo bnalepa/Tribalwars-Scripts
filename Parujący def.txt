@@ -1,4 +1,5 @@
 javascript:
+
   if ((game_data.screen !== 'report') || ((window.location.href.match("view") == null))) {
         UI.InfoMessage("WejdĹş w raport i dopiero uruchom skrypt!", 2000, 'error');
     } else {
