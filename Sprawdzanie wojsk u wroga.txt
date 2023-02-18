@@ -1,6 +1,6 @@
 javascript:
 
-plemiona = ["Alfa", "Beta", "Gamma", "HUS", "HUS.", "PałA"];
+plemiona = ["Alfa", "Beta", "Gamma", "HUS", "HUS.", "PałA"]; // lista plemion
 
 iloscWiosek = $("table#units_table>tbody>tr").length;
 wsparcia=0;
