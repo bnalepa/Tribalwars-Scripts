@@ -1,4 +1,6 @@
-javascript:list = []
+javascript:
+// by podly_lisek
+list = []
 units = []
 fullName = []
 players=[]
