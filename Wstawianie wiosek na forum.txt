@@ -1,4 +1,5 @@
 javascript:
+// by podly_lisek
 var paczki=100;
 var a=prompt("podaj wioski (rozdzielone spacją)").split(" ");
 var tekst="";
@@ -8,5 +9,6 @@ for(var i=1;i<=a.length;i++)
 {
 tekst+="[*]"+i+".[|] "+a[i-1]+" [|] "+paczki+" [|] 0 [|]\n";
 }
+
 //tekst+="[/table]";
 Dialog.show("okienko","<textarea cols=50 rows=18>"+tekst);
