@@ -1,4 +1,4 @@
-var x_min = 490;
+var x_min = 488;
 var x_max = 500;
 var y_min = 470;
 var y_max = 480;
@@ -10,6 +10,7 @@ var coords = "496|473 494|475 491|456 497|473 492|478 492|453 509|455 494|478 49
 for(var i = 0; i < coords.length; i++)
     {
     var coord = coords[i].split("|");
-    if(x_min < parseInt(coord[0]) && x_max>parseInt(coord[0]) && y_min < parseInt(coord[1]) && y_max > parseInt(coord[1]))
+    if(x_min <= parseInt(coord[0]) && x_max >= parseInt(coord[0]) && y_min <= parseInt(coord[1]) && y_max >= parseInt(coord[1]))
         result += coords[i] + " ";
 }
+result = result.trim()
