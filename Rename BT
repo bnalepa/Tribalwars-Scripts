@@ -1,0 +1,47 @@
+// ==UserScript==
+// @name         Rename BT
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Change name of browser tab
+// @author       Foxtal
+// @match        *://*.plemiona.pl/game.php?*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
+// @grant        none
+// ==/UserScript==
+var object = document.createElement("tr")
+object.class = "main"
+object.id = "quickbar_inner"
+object.innerHTML = "<td id='quickbar_contents' class='main'><input type='text' id='BTname' value='TODO' style='width:50px'> <input id='BTmin' type='number' value='0' min=0 max=59 style='width:30px'> <input id='BTsec' type='number' value='30' min=0 max=59 style='width:30px'><input type='button' onclick=renameBT($('#BTmin')[0].value,$('#BTsec')[0].value,$('#BTname')[0].value) class='btn btn-target-action' value='Start'></td>"
+
+$("#quickbar_outer")[0].children[0].append(object)
+var script = document.createElement("script");
+script.type="text/javascript";
+script.innerHTML=`
+function timer()
+    {
+
+        document.title=minutesLeft+":"+secondsLeft+" "+nameToSet;
+secondsLeft--;
+    if(secondsLeft==-1)
+    {
+       secondsLeft=59;
+        minutesLeft--;
+        if(minutesLeft==-1)
+         {
+            document.title="Time gone for " + nameToSet;
+
+            clearInterval(myInterval);
+         }
+    }
+}
+
+function renameBT(mLeft=0,sLeft,newName = "Dodge")
+{
+    secondsLeft=sLeft;
+    minutesLeft=mLeft;
+    nameToSet=newName;
+    UI.SuccessMessage(minutesLeft+":"+secondsLeft+" "+ nameToSet)
+    myInterval = setInterval(timer,1000);
+}`
+
+document.getElementsByTagName('head')[0].appendChild(script);
