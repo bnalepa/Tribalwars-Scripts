@@ -1,0 +1,38 @@
+// ==UserScript==
+// @name         Select Dodge Units
+// @namespace    http://tampermonkey.net/
+// @version      1.0.0
+// @description  Select units to dodge atack
+// @author       Foxtal
+// @match        *://*.plemiona.pl/game.php?*screen=place*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
+
+// ==/UserScript==
+// ====== Settings =======
+var unitsValue = 300;
+var spyAmount = 30;
+var priorityTable = "catapult,archer,spear,heavy,axe,light,sword".split(",");
+var weightTable = { "spear": 1.5, "sword": 1.5, "axe": 1, "archer": 1.5, "light" : 4, "marcher": 2, "heavy": 6, "ram": 2, "catapult": 4 };
+// =======================
+if(parseInt($("#unit_input_spy")[0].getAttribute("data-all-count"))> spyAmount)
+{
+    $("#unit_input_spy")[0].value = spyAmount;
+} else {
+     $("#unit_input_spy")[0].value = parseInt($("#unit_input_spy")[0].getAttribute("data-all-count"))
+}
+
+for(var i = 0; i<priorityTable.length && unitsValue>0; i++)
+    {
+    var calcUnit = parseInt($("#unit_input_"+priorityTable[i])[0].getAttribute("data-all-count"));
+    if(calcUnit != 0)
+    {
+        if(calcUnit*weightTable["catapult"]>=unitsValue)
+        {
+            $("#unit_input_"+priorityTable[i])[0].value = Math.ceil(unitsValue/weightTable[priorityTable[i]]);
+            unitsValue = 0;
+        } else {
+             $("#unit_input_"+priorityTable[i])[0].value = calcUnit;
+            unitsValue -= Math.ceil(calcUnit*weightTable[priorityTable[i]]);
+        }
+    }
+}
