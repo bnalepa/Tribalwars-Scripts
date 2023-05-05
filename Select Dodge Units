@@ -12,6 +12,7 @@
 var unitsValue = 300;
 var spyAmount = 30;
 var priorityTable = "catapult,archer,spear,heavy,axe,light,sword".split(",");
+var unitsTable = "catapult,archer,spear,heavy,axe,light,sword".split(",");
 var weightTable = { "spear": 1.5, "sword": 1.5, "axe": 1, "archer": 1.5, "light" : 4, "marcher": 2, "heavy": 6, "ram": 2, "catapult": 4 };
 // =======================
 if(parseInt($("#unit_input_spy")[0].getAttribute("data-all-count"))> spyAmount)
