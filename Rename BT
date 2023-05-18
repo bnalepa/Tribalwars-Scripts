@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Rename BT
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.0.2 - add signature
 // @description  Change name of browser tab
 // @author       Foxtal
 // @match        *://*.plemiona.pl/game.php?*
@@ -11,24 +11,27 @@
 var object = document.createElement("tr")
 object.class = "main"
 object.id = "quickbar_inner"
-object.innerHTML = "<td id='quickbar_contents' class='main'><input type='text' id='BTname' value='TODO' style='width:50px'> <input id='BTmin' type='number' value='0' min=0 max=59 style='width:30px'> <input id='BTsec' type='number' value='30' min=0 max=59 style='width:30px'><input type='button' onclick=renameBT($('#BTmin')[0].value,$('#BTsec')[0].value,$('#BTname')[0].value) class='btn btn-target-action' value='Start'></td>"
+object.innerHTML = "<td id='quickbar_contents' style='valign:bottom;border:1px solid #7d510f' class='main'><div><p></p></div><div><input type='text' id='BTname' value='KLIN' style='width:50px'>"+
+"<input id='BTmin' type='number' value='0' min=0 max=59 style='width:30px'><input id='BTsec' type='number' value='30' min=0 max=59 style='width:30px'>"+
+"<input type='button' onclick = renameBT($('#BTmin')[0].value,$('#BTsec')[0].value,$('#BTname')[0].value) class='btn btn-target-action' value='Start'>"+
+"</div><div style='text-align:right;font-size:9px;font-style: italic'>by Foxtal</div></td>";
 
 $("#quickbar_outer")[0].children[0].append(object)
 var script = document.createElement("script");
 script.type="text/javascript";
 script.innerHTML=`
-function timer()
+function timerBT()
     {
 
-        document.title=minutesLeft+":"+secondsLeft+" "+nameToSet;
-secondsLeft--;
-    if(secondsLeft==-1)
+        document.title=BTminutesLeft+":"+BTsecondsLeft+" "+BTnameToSet;
+BTsecondsLeft--;
+    if(BTsecondsLeft==-1)
     {
-       secondsLeft=59;
-        minutesLeft--;
-        if(minutesLeft==-1)
+       BTsecondsLeft=59;
+        BTminutesLeft--;
+        if(BTminutesLeft==-1)
          {
-            document.title="Time gone for " + nameToSet;
+            document.title="Time gone for " + BTnameToSet;
 
             clearInterval(myInterval);
          }
@@ -37,11 +40,11 @@ secondsLeft--;
 
 function renameBT(mLeft=0,sLeft,newName = "Dodge")
 {
-    secondsLeft=sLeft;
-    minutesLeft=mLeft;
-    nameToSet=newName;
-    UI.SuccessMessage(minutesLeft+":"+secondsLeft+" "+ nameToSet)
-    myInterval = setInterval(timer,1000);
+    BTsecondsLeft=sLeft;
+    BTminutesLeft=mLeft;
+    BTnameToSet=newName;
+    UI.SuccessMessage(BTminutesLeft+":"+BTsecondsLeft+" "+ BTnameToSet)
+    myInterval = setInterval(timerBT,1000);
 }`
 
 document.getElementsByTagName('head')[0].appendChild(script);
