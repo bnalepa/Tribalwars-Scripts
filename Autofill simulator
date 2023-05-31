@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Autofill simulator
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.0.1
 // @description  Sim units in village
 // @author       Foxtal
 // @match        *://*.plemiona.pl/game.php?*screen=place*autofill=true*
@@ -20,5 +20,6 @@ Into quick bar:
 (function() {
     $("#def_fill_select")[0].value= "current_village";
     $("#def_fill_select").trigger("change");
+    $("#is_night")[0].checked = false;
     $(".btn")[9].click()
 })();
