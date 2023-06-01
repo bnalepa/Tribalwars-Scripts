@@ -7,6 +7,5 @@ $(".quickedit-content")[i].children[1].click()
 a = $(".quickedit")[i].children[1];
 a.children[0].value = newName
 
-
 $(".ui-sortable-handle")[3].innerHTML+=`<input type='text' id='newAttackTag' value='OK' style='width:50px'>
 <input type='button' onclick = renameAttackTag($('#newAttackTag')[0].value) class='btn btn-target-action' value='Rename'>`
