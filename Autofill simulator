@@ -8,14 +8,13 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
 // @grant        none
 // ==/UserScript==
-
+// 1.0.1 - night bonus is always OFF
 /*
 Into quick bar:
 
 {game}&screen=place&mode=sim&simulate&att_axe=6000&att_light=3100&att_ram=400&luck=0&autofill=true
 
 */
-
 
 (function() {
     $("#def_fill_select")[0].value= "current_village";
