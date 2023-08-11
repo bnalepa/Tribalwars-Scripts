@@ -1,0 +1,76 @@
+// ==UserScript==
+// @name         Types villages (village)
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Assigned villages to OFF/DEF from village view
+// @author       Foxtal
+// @match         *://*.plemiona.pl/game.php?*screen=info_village*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
+
+// ==/UserScript==
+
+
+if(localStorage.foxtalTypesVillagesOFF == undefined)
+localStorage.foxtalTypesVillagesOFF = "";
+
+if(localStorage.foxtalTypesVillagesDEF== undefined)
+localStorage.foxtalTypesVillagesDEF = "";
+
+document.getElementById("content_value").children[0].innerHTML+="<div id='foxtalTypesVillages' style='float:right'></div>";
+
+var script = document.createElement("script");
+script.type="text/javascript";
+script.innerHTML=`
+
+
+var villageCoords = document.getElementById("embedmap_village").parentNode.parentNode.children[2].children[1].innerHTML
+
+var buttons = "<input type='button' onclick = foxtalTypesVillages_changeOnOFF('" + villageCoords + "') class='btn btn-target-action' value='OFF'>"+
+"<input type='button' onclick = foxtalTypesVillages_changeOnDEF('" + villageCoords + "') class='btn btn-target-action' value='DEF'>" +
+"<input type='button' onclick = foxtalTypesVillages_delete('" + villageCoords + "') class='btn btn-target-action' value='DEL'>";
+
+function foxtalTypesVillages_checkVillage()
+{
+   var villageType = "Not assigned";
+
+if(localStorage.foxtalTypesVillagesOFF.split(" ").find(x => x == villageCoords))
+{
+    villageType = "OFF";
+} else if(localStorage.foxtalTypesVillagesDEF.split(" ").find(x => x == villageCoords))
+{
+    villageType = "DEF";
+}
+
+document.getElementById("foxtalTypesVillages").innerHTML = " <b>" + villageType + " </b>" + buttons;
+}
+
+
+function foxtalTypesVillages_delete(villageCoords)
+{
+    localStorage.foxtalTypesVillagesOFF = localStorage.foxtalTypesVillagesOFF.split(" ").filter( x => !(x == villageCoords)).join(" ");
+    localStorage.foxtalTypesVillagesDEF = localStorage.foxtalTypesVillagesDEF.split(" ").filter( x => !(x == villageCoords)).join(" ");
+
+    foxtalTypesVillages_checkVillage();
+}
+function foxtalTypesVillages_changeOnDEF(villageCoords)
+{
+        localStorage.foxtalTypesVillagesOFF = localStorage.foxtalTypesVillagesOFF.split(" ").filter( x => !(x == villageCoords)).join(" ");
+    localStorage.foxtalTypesVillagesDEF = localStorage.foxtalTypesVillagesDEF.split(" ").filter( x => !(x == villageCoords)).join(" ");
+
+    localStorage.foxtalTypesVillagesDEF = localStorage.foxtalTypesVillagesDEF+ " " + villageCoords;
+    foxtalTypesVillages_checkVillage();
+}
+
+function foxtalTypesVillages_changeOnOFF(villageCoords)
+{
+        localStorage.foxtalTypesVillagesOFF = localStorage.foxtalTypesVillagesOFF.split(" ").filter( x => !(x == villageCoords)).join(" ");
+    localStorage.foxtalTypesVillagesDEF = localStorage.foxtalTypesVillagesDEF.split(" ").filter( x => !(x == villageCoords)).join(" ");
+
+    localStorage.foxtalTypesVillagesOFF = localStorage.foxtalTypesVillagesOFF+ " " + villageCoords;
+    foxtalTypesVillages_checkVillage();
+}`;
+
+document.getElementsByTagName('head')[0].appendChild(script);
+
+
+foxtalTypesVillages_checkVillage();
