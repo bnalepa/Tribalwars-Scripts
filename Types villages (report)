@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Types villages (report)
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Assigned villages to OFF/DEF
+// @version      1.1
+// @description  Assigned villages to OFF/DEF from report
 // @author       Foxtal
 // @match        *://*.plemiona.pl/game.php?*screen=report*view=*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
@@ -18,7 +18,8 @@ localStorage.foxtalTypesVillagesDEF = "";
 
 
 
-document.getElementsByClassName("village_anchor contexted")[0].innerHTML += "<div id='foxtalTypesVillages' style='float:right'></div>";
+//document.getElementsByClassName("village_anchor contexted")[0].innerHTML += "<div id='foxtalTypesVillages' style='float:right'></div>";
+document.getElementById("content_value").children[0].innerHTML+="<div id='foxtalTypesVillages' style='float:right'></div>";
 
 var script = document.createElement("script");
 script.type="text/javascript";
@@ -43,7 +44,7 @@ if(localStorage.foxtalTypesVillagesOFF.split(" ").find(x => x == villageCoords))
     villageType = "DEF";
 }
 
-document.getElementById("foxtalTypesVillages").innerHTML = buttons + " <b>" + villageType + "</b>";
+document.getElementById("foxtalTypesVillages").innerHTML = " <b>" + villageType + " </b>" + buttons;
 }
 
 
@@ -68,7 +69,7 @@ function foxtalTypesVillages_changeOnOFF(villageCoords)
         localStorage.foxtalTypesVillagesOFF = localStorage.foxtalTypesVillagesOFF.split(" ").filter( x => !(x == villageCoords)).join(" ");
     localStorage.foxtalTypesVillagesDEF = localStorage.foxtalTypesVillagesDEF.split(" ").filter( x => !(x == villageCoords)).join(" ");
 
-    localStorage.foxtalTypesVillagesOFF = localStorage.foxtalTypesVillagesDEF+ " " + villageCoords;
+    localStorage.foxtalTypesVillagesOFF = localStorage.foxtalTypesVillagesOFF+ " " + villageCoords;
     foxtalTypesVillages_checkVillage();
 }`;
 
