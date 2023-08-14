@@ -1,14 +1,15 @@
 // ==UserScript==
 // @name         Types villages (report)
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Assigned villages to OFF/DEF from report
 // @author       Foxtal
 // @match        *://*.plemiona.pl/game.php?*screen=report*view=*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
 
 // ==/UserScript==
-
+// 1.1 Change position
+// 1.2 Added defender village
 
 if(localStorage.foxtalTypesVillagesOFF == undefined)
 localStorage.foxtalTypesVillagesOFF = "";
@@ -28,13 +29,21 @@ script.innerHTML=`
 var villageName = document.getElementsByClassName("village_anchor contexted")[0].children[0].innerHTML.trim();
 var villageCoords = villageName.slice(villageName.length - 12, villageName.length - 5);
 
+var villageName2 = document.getElementsByClassName("village_anchor contexted")[1].children[0].innerHTML.trim();
+var villageCoords2 = villageName2.slice(villageName2.length - 12, villageName2.length - 5);
+
 var buttons = "<input type='button' onclick = foxtalTypesVillages_changeOnOFF('" + villageCoords + "') class='btn btn-target-action' value='OFF'>"+
 "<input type='button' onclick = foxtalTypesVillages_changeOnDEF('" + villageCoords + "') class='btn btn-target-action' value='DEF'>" +
 "<input type='button' onclick = foxtalTypesVillages_delete('" + villageCoords + "') class='btn btn-target-action' value='DEL'>";
 
+var buttons2 = "<input type='button' onclick = foxtalTypesVillages_changeOnOFF('" + villageCoords2 + "') class='btn btn-target-action' value='OFF'>"+
+"<input type='button' onclick = foxtalTypesVillages_changeOnDEF('" + villageCoords2 + "') class='btn btn-target-action' value='DEF'>" +
+"<input type='button' onclick = foxtalTypesVillages_delete('" + villageCoords2 + "') class='btn btn-target-action' value='DEL'>";
+
 function foxtalTypesVillages_checkVillage()
 {
-   var villageType = "Not assigned";
+   var villageType = "NULL";
+   var villageType2 = "NULL";
 
 if(localStorage.foxtalTypesVillagesOFF.split(" ").find(x => x == villageCoords))
 {
@@ -44,7 +53,15 @@ if(localStorage.foxtalTypesVillagesOFF.split(" ").find(x => x == villageCoords))
     villageType = "DEF";
 }
 
-document.getElementById("foxtalTypesVillages").innerHTML = " <b>" + villageType + " </b>" + buttons;
+if(localStorage.foxtalTypesVillagesOFF.split(" ").find(x => x == villageCoords2))
+{
+    villageType2 = "OFF";
+} else if(localStorage.foxtalTypesVillagesDEF.split(" ").find(x => x == villageCoords2))
+{
+    villageType2 = "DEF";
+}
+
+document.getElementById("foxtalTypesVillages").innerHTML = " <div><b>Aggressor: " + villageType + " </b>" + buttons + "</div><div><b>Defender: " + villageType2 + " </b>" + buttons2 + "</div>";
 }
 
 
