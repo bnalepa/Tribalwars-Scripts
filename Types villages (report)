@@ -92,5 +92,4 @@ function foxtalTypesVillages_changeOnOFF(villageCoords)
 
 document.getElementsByTagName('head')[0].appendChild(script);
 
-
 foxtalTypesVillages_checkVillage();
