@@ -1,0 +1,63 @@
+// ==UserScript==
+// @name         Naming attacks
+// @version      1.1
+// @description  Easy naming attacks (compatible with "Types villages (village)" and "Types villages (report)"
+// @author       Foxtal
+// @match        *://*.plemiona.pl/game.php?village=*&screen=overview_villages*mode=incomings*subtype=attacks
+// @match        *://*.plemiona.pl/game.php?village=*&screen=overview_villages*mode=incomings*subtype=attacks&group=*&page=*&subtype=attacks*
+// @match        *://*.plemiona.pl/game.php?t=*&village=*&screen=overview_villages*mode=incomings*subtype=attacks
+// @match        *://*.plemiona.pl/game.php?t=*&village=*&screen=overview_villages*mode=incomings*subtype=attacks&group=*&page=*&subtype=attacks*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
+// ==/UserScript==
+
+//////////////////////////////////////////
+var villages = [
+    ["PADŁ 18.07" , "420|670 "],
+    ["OFF", "439|685"],
+    ["DEF", "444|455"]
+                ]
+//////////////////////////////////////////
+if(localStorage.foxtalTypesVillagesOFF == undefined)
+localStorage.foxtalTypesVillagesOFF = "";
+
+if(localStorage.foxtalTypesVillagesDEF== undefined)
+localStorage.foxtalTypesVillagesDEF = "";
+
+var attack_table = document.getElementById("incomings_table").children[1].children;
+var number = 0;
+    for(var i = 1; i < attack_table.length - 1; i++ )
+    {
+        var attack_name = attack_table[i].children[0].children[2].children[0].children[0].innerText;
+        if(!attack_name.includes("[F]"))
+        {
+            for(j in villages)
+            {
+                if(villages[j][1].includes(attack_table[i].children[2].innerText.slice(-12, -5)))
+                {
+                    attack_table[i].children[0].children[2].children[0].children[1].click();
+                    attack_table[i].children[0].children[2].children[1].children[0].value+=" [F] " + villages[j][0];
+                    number++;
+                }
+            }
+        }
+    }
+UI.SuccessMessage(number + " commands to change")
+document.getElementById("incomings_table").children[1].children[0].children[0].innerHTML+= "<div><input type='button' onclick = changeName() class='btn btn-target-action' value='Change'><br>Left: <span id='numberLeft'>"+number+"</span></div>";
+
+var script = document.createElement("script");
+script.type="text/javascript";
+script.innerHTML=`
+
+function changeName()
+{
+        for (var i = 0; i < document.getElementsByClassName("btn").length; i++)
+    {
+        if(document.getElementsByClassName("btn")[i].value == "Zmień nazwę")
+        {
+            document.getElementsByClassName("btn")[i].click();
+            document.getElementById('numberLeft').innerText--;
+            break;
+        }
+    }
+}`
+document.getElementsByTagName('head')[0].appendChild(script);
