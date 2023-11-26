@@ -1,0 +1,24 @@
+// ==UserScript==
+// @name         Attack one coord
+// @namespace    http://tampermonkey.net/
+// @version      1.0.0
+// @description
+// @author       Foxtal
+// @match        *://*.plemiona.pl/game.php?*screen=place*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
+
+// ==/UserScript==
+// ====== Settings =======
+
+var units = "spear,sword,axe,archer,spy,light,marcher,heavy,ram,catapult".split(",");
+var target = "475|496"
+
+// =======================
+
+
+$(".target-input-field")[0].value = target;
+
+for(var i = 0; i<units.length; i++)
+{
+    $("#unit_input_"+units[i])[0].value = $("#unit_input_"+units[i])[0].getAttribute("data-all-count");
+}
