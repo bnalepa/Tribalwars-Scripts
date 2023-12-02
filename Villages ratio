@@ -1,0 +1,277 @@
+// Villages ratio
+// modified by Foxtal
+// v1.2
+javascript:
+function openUI(){
+	html='<head></head><body><h1>Tribe troop counter</h1><form><fieldset><legend>Settings</legend><p><input type="radio" name="mode" id="of" value="Read troops of the village" onchange="setMode(\'members_troops\')">Read units ratio</input></p></fieldset><fieldset><legend>Filters</legend><select id="variable"><option value="x">x</option><option value="y">y</option>'+createUnitOption()+'</select><select id="kind"><option value=">">\></option><option value="<">\<</option></select><input type="text" id="value"></input><input type="button" class="btn evt-confirm-btn btn-confirm-yes" onclick="addFilter()" value="Save filter"></input><p><table><tr><th>Variable filtered</th><th>Operatore</th><th>Value</th><th></th></tr>'+createFilterTable()+'</form></p></fieldset><div><p><input type="button" class="btn evt-confirm-btn btn-confirm-yes" id="run" onclick="readData()" value="Read data"></input></p></div></body>';
+	Dialog.show("Troop counter",html);
+	if(localStorage.troopCounterMode){
+		if(localStorage.troopCounterMode == "members_troops"){
+			document.getElementById("of").checked=true;
+		}
+		else{
+			document.getElementById("in").checked=true;
+		}
+	}
+	else{
+		document.getElementById("of").checked=true;
+	}
+}
+
+function setMode(a){
+	localStorage.troopCounterMode=a;
+}
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+function downloadInfo(url){
+	var request = new XMLHttpRequest();
+    request.open('GET', url, false);
+    request.send(null);
+	return request.response;
+}
+
+function getPlayerDict(){
+	playerDict={};
+	now=new Date();
+	server=window.location.host;
+	if(localStorage.playerDictFake){
+		if(localStorage.playerDictFake.split(":::")[0] == server){
+			savedDate=new Date(localStorage.playerDictFake.split(":::")[1])
+			if(now - savedDate < 1000*60*60){
+				playerDict=JSON.parse(localStorage.playerDictFake.split(":::")[2]);
+				return playerDict;
+			}
+		}
+	}
+	playerUrl="https://"+window.location.host+"/map/player.txt";
+	playerList=downloadInfo(playerUrl).split("\n");
+	for(i=0;i<playerList.length;i++){
+		if (playerList[i] != ""){
+			row=playerList[i].split(",");
+			playerDict[row[0]]=row[1].replace(/\+/g, " ");
+		}
+	}
+	localStorage.playerDictFake=server+":::"+now+":::"+JSON.stringify(playerDict);
+	return playerDict;
+
+}
+
+function addFilter(){
+	filters={};
+	if (localStorage.troopCounterFilter){
+		filters=JSON.parse(localStorage.troopCounterFilter);
+	}
+	if(filters[document.getElementById("variable").value]){
+		if(isNaN(document.getElementById("value").value)){
+			UI.ErrorMessage("Insert a valid value",3000);
+		}
+		else{
+			filters[document.getElementById("variable").value].push([document.getElementById("kind").value,document.getElementById("value").value]);
+			}
+	}
+	else{
+		if(isNaN(document.getElementById("value").value)){
+			UI.ErrorMessage("Insert a valid value",3000);
+		}
+		else{
+			filters[document.getElementById("variable").value]=[[document.getElementById("kind").value,document.getElementById("value").value]];
+		}
+	}
+	localStorage.troopCounterFilter=JSON.stringify(filters);
+	openUI();
+}
+
+function createUnitOption(){
+	unitsList=game_data.units;
+	menu="";
+	for(i=0;i<unitsList.length;i++){
+		menu=menu+'<option value="'+unitsList[i]+'">'+unitsList[i]+'</option>';
+	}
+	return menu;
+}
+
+function createFilterTable(){
+	filters={};
+	if (localStorage.troopCounterFilter){
+		filters=JSON.parse(localStorage.troopCounterFilter);
+	}
+	rows=""
+	for (filter in filters){
+		for(i=0;i<filters[filter].length;i++){
+			rows=rows+'<tr><td>'+filter+'</td><td>'+filters[filter][i][0]+'</td><td>'+filters[filter][i][1]+'</td><td><input type="image" src="https://dsit.innogamescdn.com/asset/cbd6f76/graphic/delete.png" onclick="deleteFilter(\''+filter+'\',\''+i.toString()+'\')"></input></td></tr>';
+		}
+	}
+	return rows;
+}
+
+function deleteFilter(filter,i){
+	if(localStorage.troopCounterFilter){
+		filtres=JSON.parse(localStorage.troopCounterFilter);
+		if(filter in filtres){
+			if(parseInt(i)<filtres[filter].length){
+				filtres[filter].splice(parseInt(i),1);
+			}
+		}
+	}
+	localStorage.troopCounterFilter=JSON.stringify(filtres);
+	openUI();
+}
+
+function convertToHTML(str) {
+	var parser = new DOMParser();
+	var doc = parser.parseFromString(str, 'text/html');
+	return doc.body;
+}
+
+function getAllPlayersList(){
+	let players = [];
+	Array.from(document.querySelector('#ally_content .input-nicer').options).forEach(function(option_element) {
+		var option_text = option_element.text.trim();
+		var option_value = option_element.value;
+		if (option_text != 'Wybierz członka') {
+		players.push({
+			id: option_value,
+			nick: option_text
+		});
+		}
+	});
+	return players;
+}
+
+function getURL(id){
+	var params = new URLSearchParams(window.location.search);
+	params.set('player_id', id);
+	return "".concat(window.location.origin).concat(window.location.pathname, "?").concat(params.toString());
+}
+
+async function readData(){
+	if (game_data.mode=="members_defense" || game_data.mode=="members_troops"){
+        let step;
+        game_data.mode=="members_defense" ? step = 2 : step = 1;
+		var html= '<label> Reading...     </label><progress id="bar" max="1" value="0">  </progress>';
+    	Dialog.show("Progress bar", html);
+    	filtres={};
+		if (localStorage.troopCounterFilter){
+			filtres=JSON.parse(localStorage.troopCounterFilter);
+		}
+		mode=localStorage.troopCounterMode;
+		data="Coords,Player,";
+		unitsList=game_data.units;
+		for(k=0;k<unitsList.length;k++){
+			data=data+unitsList[k]+",";
+		}
+		players = getAllPlayersList();
+		data=data+"\n";
+		i=0;
+		async function loop(url, id, i){
+			var response = await fetch(url);
+			var html = await response.text();
+			var doc = convertToHTML(html);
+			document.getElementById("bar").value=(i/players.length);
+			if (doc.getElementsByClassName('paged-nav-item').length && id !== -1) {
+				await loop(doc.getElementsByClassName('paged-nav-item')[1].href, -1, i)
+		    }
+			var rows = doc.querySelectorAll('.table-responsive .vis tr');
+			for(j=1;j<rows.length;j+=step){
+				let row = rows[j].innerHTML.replaceAll(" ", "").replaceAll("\n", "");
+				villageData={};
+                                villageData["x"]=row.match(/[0-9]{3}\|[0-9]{3}/g).slice(-1)[0].split("|")[0];
+                                villageData["y"]=row.match(/[0-9]{3}\|[0-9]{3}/g).slice(-1)[0].split("|")[1];
+				for(k=2 - step%2;k<rows[j].cells.length;k++){
+					villageData[unitsList[k-2]]=+rows[j].cells[k - step%2].innerText;
+				}
+				filtered=true; //filtered==true ok, ==false hide
+				for(key in filtres){
+					for(k=0;k<filtres[key].length;k++){
+						if(filtres[key][k][0] == ">"){
+							if(parseInt(villageData[key])<parseInt(filtres[key][k][1])){
+								filtered=false;
+							}
+						}
+						else if(filtres[key][k][0] == "<"){
+							if(parseInt(villageData[key])>parseInt(filtres[key][k][1])){
+								filtered=false;
+							}
+						}
+					}
+				}
+				if(filtered){
+					data=data+villageData["x"]+"|"+villageData["y"]+",";
+					data=data+players[i].nick + ",";
+					for(k=0;k<unitsList.length;k++){
+						data=data+villageData[unitsList[k]]+",";
+					}
+					data=data+"\n";
+				}
+			}
+		}
+		for (i=0;i<players.length;i++){
+			const id = players[i].id;
+			await loop(getURL(id), id, i)
+		}
+        /////////
+        //    Villages Types
+        /////////
+        const dataTable = data.split("\n");
+        dataTable.shift();
+        let playerTable = [];
+        for(let i of dataTable)
+            {
+                villageInfo = i.split(",");
+                player = villageInfo[1];
+                if(player == undefined)
+                {
+                    break;
+                }
+                   
+                if(playerTable[player] == undefined)
+                {
+                    playerTable[player] = [];
+                    playerTable[player]["OFF"] = 0;
+                    playerTable[player]["DEF"] = 0;
+                }
+        
+                defSum = parseFloat(villageInfo[2]) + parseFloat(villageInfo[3]) + parseFloat(villageInfo[5]) + parseFloat(villageInfo[9])*4;
+                offSum = parseFloat(villageInfo[4]) + parseFloat(villageInfo[6])*4;
+                if(defSum > offSum)
+                {
+                    playerTable[player]["DEF"] += 1;
+                } else {
+                    playerTable[player]["OFF"] += 1;
+                }
+            }
+        let outputData = "Player: \n";
+        let sumOffVillages = 0;
+        let sumDefVillages = 0;
+        for(let i in playerTable)
+            {
+                sumOffVillages += playerTable[i]["OFF"];
+                sumDefVillages += playerTable[i]["DEF"];
+                outputData += i + " - OFF: " + playerTable[i]["OFF"] + " DEF: "+ playerTable[i]["DEF"] + "\n"+  (playerTable[i]["OFF"]/(playerTable[i]["DEF"]+playerTable[i]["OFF"])*100).toFixed(2) + "% OFFA\n";
+            }
+
+        outputData += "\nTribe: - OFF: " + sumOffVillages + " DEF: "+ sumDefVillages + "\n"+  (sumOffVillages/(sumOffVillages + sumDefVillages)*100).toFixed(2) + "%\n";
+
+        ////////
+		showData(outputData, mode);
+	}
+}
+
+function showData(data){
+	html= '<head></head><body><p><h2>Tribe data</h2></p><p><textarea readonly=true style="width: 30vw; height: 50vh">'+data+'</textarea></p><p><input type="button" class="btn evt-confirm-btn btn-confirm-yes" id="download" onclick="download(\'tribe info\',data)" value="Download as csv"></input><input type="button" class="btn evt-confirm-btn btn-confirm-no" onclick="openUI()" value="Back to main menu"></input></p></body>';
+	Dialog.show("Tribe data", html);
+}
+
+openUI();
