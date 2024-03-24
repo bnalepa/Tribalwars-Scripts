@@ -1,0 +1,20 @@
+// ==UserScript==
+// @name         Change village when map lock
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  You could switch village on the map view, when map position remains locked. Use fav button on map.
+// @author       Foxtal
+// @match        https://pl200.plemiona.pl/game.php?*screen=map*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
+// @grant        unsafeWindow
+// ==/UserScript==
+
+unsafeWindow.addTargetVillage = function addTargetVillage()
+{
+    let targetVillage = document.getElementById("map-ctx-buttons").children[0].href.split("=")[4]
+window.location.replace(`/game.php?village=${targetVillage}&screen=map${window.location.href.split("&screen=map")[1]}`)
+}
+let map = document.getElementById("map_mover");
+
+$('#mp_fav').replaceWith($('#mp_fav').clone());
+document.getElementById("mp_fav").addEventListener("mousedown", addTargetVillage, false);
