@@ -1,0 +1,28 @@
+// ==UserScript==
+// @name         Message template
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Simple message template
+// @author       Foxtal
+// @include      *://*.plemiona.pl/game.php?*screen=mail&mode=new*
+// @grant        none
+// ==/UserScript==
+(function() {
+    let titleField = document.getElementsByName("subject")[0]
+    let messageField = document.getElementById("message")
+    let title = "Tytuł";
+    let message = `[b]Witam gracza[/b]
+
+Treść
+
+
+
+
+
+Pozdrawiam
+Foxtal`;
+
+
+    titleField.value = title
+    messageField.innerHTML = message
+})();
