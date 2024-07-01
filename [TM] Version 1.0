@@ -1,0 +1,242 @@
+// ==UserScript==
+// @name         Attacks Checker
+// @version      1.0
+// @description  Check attacks on villages based on "attacks"
+// @author       Foxtal
+// @match        *.plemiona.pl/game.php*
+// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @grant        unsafeWindow
+// ==/UserScript==
+
+
+
+
+//          Config               //
+
+
+    let delay = 2*60*60 // hh*mm*ss
+
+
+    let attacksTypeTextTranslation =
+    {
+
+    }
+
+    let attacksType = {
+
+    }
+
+
+   let attacks =
+
+
+
+
+
+
+       {'2033': [{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508}]}
+
+
+
+
+
+//         END Config               //
+
+
+
+    //Global function - init
+   let menuRow = document.getElementById("foxtalMenu").children[0]
+   let tr = document.createElement("tr")
+   tr.innerHTML = `
+
+<td class="menu-column-item"><a onclick='foxtalAttacksChecker()'>Attacks Checker</a></td>
+
+`
+       menuRow.insertBefore(tr,menuRow.firstChild)
+///
+
+
+
+// Global function - function
+   let output = []
+   unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
+   {
+
+       let startTime = new Date();
+       let keys = Object.keys(attacks);
+
+       let keysCount = keys.length;
+       let html = `"<head></head><body><p><h2>Tribe data</h2></p><p><textarea readonly=true style="width: 50vw; height: 80vh" id = "progressStatus">Postęp wiosek: 0/${keysCount}</textarea></p></body>`
+       Dialog.show("Tribe data", html);
+
+       let progressStatus = document.getElementById('progressStatus');
+
+       let currentKey = 0
+
+
+       for( target in attacks)
+       {
+           currentKey++
+           let endTime = new Date();
+           let duration = endTime - startTime;
+
+           let durationInSeconds = duration / 1000;
+
+           progressStatus.value = `Postęp wiosek: ${currentKey}/${keysCount} w ${durationInSeconds} s`
+
+           let sumDelay = Math.floor(Math.random()  * (105 - 75 + 1)) + 75
+           console.log(`Oczekiwanie przez ${sumDelay} ms...`);
+
+
+           await checkPlayerVillages(target, attacks[target]);
+
+           await new Promise(resolve => setTimeout(resolve, sumDelay));
+       }
+
+
+
+
+    async  function checkPlayerVillages(target, attacks)
+    {
+
+            //console.time('program');
+
+
+            fetch('game.php?screen=info_village&id='+target).then(function (response) {
+        if (response.ok) {
+            return response.text();
+        }
+        throw response;
+    }).then(function (text) {
+        let parser = new DOMParser();
+        let start = text.indexOf(`<div id="commands_outgoings"`)
+        let end = text.indexOf(`report_table`)
+        let htmlString = text.substring(start,end)
+        let doc = parser.parseFromString(htmlString, 'text/html');
+        let tableRows = doc.getElementsByClassName(`command-row`)
+        for(const command of attacks)
+        {
+            let attackerName = command.player
+            let typeOfOrder = command.typeOfOrder
+            let windowEnd = command.timeWindowEnd
+            if (!output[attackerName]) {
+                output[attackerName] = {};
+            }
+
+
+            if (!output[attackerName][typeOfOrder]) {
+                output[attackerName][typeOfOrder] = {
+                    'onTime': 0,
+                    'delay': 0,
+                    'bigDelay':0,
+                    'toSend': 0
+                };
+            }
+
+                let find = false
+
+                for (const tableRow of tableRows) {
+                    const player = tableRow.querySelectorAll('.quickedit-label')
+                    const playerName = player[0].innerHTML.trim().split(':')[0]
+
+
+                        if(attackerName == playerName && !find)
+                        {
+                            const iconContainer = tableRow.querySelectorAll('.icon-container')[0];
+
+
+                            const attackSmallImg = iconContainer.querySelector('img[src*="attack_small"]');
+                            const attackMediumImg = iconContainer.querySelector('img[src*="attack_medium"]');
+                            const attackLargeImg = iconContainer.querySelector('img[src*="attack_large"]');
+                            const snobImg = iconContainer.querySelector('img[src*="snob"]');
+
+                            let thisAttackType = 'undefinied'
+
+                            if (attackSmallImg) {
+                                thisAttackType = 'attack_small';
+                            } else if (attackMediumImg) {
+                                thisAttackType = 'attack_medium';
+                            } else if (attackLargeImg) {
+                                thisAttackType = 'attack_large';
+                            }
+                            if (snobImg) {
+                                thisAttackType += ',snob';
+                            }
+                            // if undefinied = support
+                            if(attacksType[thisAttackType].name == typeOfOrder)
+                            {
+
+                                const spanWithCommandTime = tableRow.querySelector('span[data-endtime]');
+                                const commandTime = spanWithCommandTime.getAttribute('data-endtime')
+
+                                if(commandTime < windowEnd)
+                                {
+                                    output[attackerName][typeOfOrder]['onTime']++
+                                } else if(commandTime < windowEnd + delay){
+                                    output[attackerName][typeOfOrder]['delay']++
+                                } else {
+                                    output[attackerName][typeOfOrder]['bigDelay']++
+                                }
+
+                                find = true
+                                tableRow.remove()
+                            }
+
+                        }
+
+
+
+                }
+                output[attackerName][typeOfOrder]['toSend']++
+
+
+
+        }
+    })
+            //console.timeEnd('program');
+
+    }
+
+
+
+
+
+
+
+        /////
+        setTimeout(() => {
+        let sumOutput = `([color=#00ff00]OK[/color] [color=#8d8d55]Małe opóźnienie[/color] [color=#fca503]Duże opóźnienie[/color] [color=#ff0000]Brak wysyłki[/color])
+    `
+    for(let player in output)
+        {
+            let calculatedOutput = ''
+            let sumSend = 0;
+            let sumToSend = 0;
+            let playerAttacks = output[player]
+
+        for (let attackType in playerAttacks)
+            {
+                let onTime = playerAttacks[attackType]['onTime']
+                let delay = playerAttacks[attackType]['delay']
+                let bigDelay = playerAttacks[attackType]['bigDelay']
+                let toSend = playerAttacks[attackType]['toSend']
+                let sumSendType = onTime + delay + bigDelay
+                let attackTypeTT = attacksTypeTextTranslation[attackType]
+                sumSend +=sumSendType
+                sumToSend += toSend
+
+                calculatedOutput += `${attackTypeTT} - ${sumSendType}/${toSend} ([color=#00ff00]${onTime}[/color] [color=#8d8d55]${delay}[/color] [color=#fca503]${bigDelay}[/color] [color=#ff0000]${toSend-sumSendType}[/color]) \n`
+
+
+            }
+            let percentage = ((sumSend / sumToSend) * 100).toFixed(2)
+        sumOutput += `[player]${player}[/player] wysłał ${sumSend} z ${sumToSend} rozkazów ([b]${percentage}%[/b]) \n  ${calculatedOutput} \n`
+
+        }
+
+    html= '<head></head><body><p><h2>Tribe data</h2></p><p><textarea readonly=true style="width: 50vw; height: 80vh">'+sumOutput+'</textarea></p></body>';
+
+        Dialog.show("Tribe data", html);
+    },1000)
+
+}
