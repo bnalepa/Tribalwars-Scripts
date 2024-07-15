@@ -1,40 +1,56 @@
 // ==UserScript==
-// @name         Attacks Checker
-// @version      1.0
+// @name         Attacks Checker v1.2
+// @version      1.2
 // @description  Check attacks on villages based on "attacks"
 // @author       Foxtal
 // @match        *.plemiona.pl/game.php*
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=plemiona.pl
 // @grant        unsafeWindow
 // ==/UserScript==
 
+/*
+1.1  - add villages list and colors
+1.2 - remove(NOT) (temporary) medium off, add delay percentage, increase output delay
 
 
+TODO:
+konwerter opóźnienia każdego typu ataku
+czytanie komend zbierającego komendy
+
+*/
 
 //          Config               //
 
 
-    let delay = 2*60*60 // hh*mm*ss
+let delay = 1*60*60 // hh*mm*ss
+
+let colorGreen = '0eae0e'
+let colorGrey = '8d8d55'
+let colorOrange = 'd47e33'
+let colorRed = 'ff0000'
 
 
-    let attacksTypeTextTranslation =
+let attacksTypeTextTranslation =
     {
-
+        "snob": "Szlachcic",
+        "offSnob": "Offoszlachta",
+        "big": "Duży off",
+        "small": "Średni off",
+        "fake": "Burzak/fejk"
     }
 
-    let attacksType = {
-
-    }
-
-
-   let attacks =
-
-
-
-
+let attacksType = {
+    'attack_small,snob': {"name":"snob"} ,
+    'attack_large,snob': {"name":"offSnob"} ,
+    'attack_medium,snob': {"name":"offSnob"} ,
+    'attack_large': {"name":"big"} ,
+    'attack_medium': {"name":"small"} ,
+    'attack_small': {"name":"fake"} ,
+}
 
 
-       {'2033': [{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508},{'player': 'Shadow Tails', 'typeOfOrder': 'fake', 'timeWindowEnd': 1719848508}]}
+let attacks =
+
 
 
 
@@ -44,54 +60,57 @@
 
 
 
-    //Global function - init
-   let menuRow = document.getElementById("foxtalMenu").children[0]
-   let tr = document.createElement("tr")
-   tr.innerHTML = `
+//Global function - init
+let menuRow = document.getElementById("foxtalMenu").children[0]
+let tr = document.createElement("tr")
+tr.innerHTML = `
 
-<td class="menu-column-item"><a onclick='foxtalAttacksChecker()'>Attacks Checker</a></td>
+<td class="menu-column-item"><a onclick='foxtalAttacksChecker()'>Attacks Checker(BETA)</a></td>
 
 `
-       menuRow.insertBefore(tr,menuRow.firstChild)
+menuRow.insertBefore(tr,menuRow.firstChild)
 ///
 
 
 
 // Global function - function
-   let output = []
-   unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
-   {
+let output = []
+let villagesOutput = []
+unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
+{
 
-       let startTime = new Date();
-       let keys = Object.keys(attacks);
+    let startTime = new Date();
+    let keys = Object.keys(attacks);
 
-       let keysCount = keys.length;
-       let html = `"<head></head><body><p><h2>Tribe data</h2></p><p><textarea readonly=true style="width: 50vw; height: 80vh" id = "progressStatus">Postęp wiosek: 0/${keysCount}</textarea></p></body>`
-       Dialog.show("Tribe data", html);
+    let keysCount = keys.length;
+    let html = `<head></head><body><p><h2>Player Info</h2></p><p><textarea readonly=true style="width: 50vw; height: 20vh" id = "playerOutput">Postęp wiosek: 0/${keysCount}</textarea>
+<p><h2>Villages Info</h2></p>
+<textarea readonly = true style="width: 50vw; height: 20vh" id = "villagesOutput"></textarea></p></body>`
+    Dialog.show("Tribe data", html);
 
-       let progressStatus = document.getElementById('progressStatus');
-
-       let currentKey = 0
-
-
-       for( target in attacks)
-       {
-           currentKey++
-           let endTime = new Date();
-           let duration = endTime - startTime;
-
-           let durationInSeconds = duration / 1000;
-
-           progressStatus.value = `Postęp wiosek: ${currentKey}/${keysCount} w ${durationInSeconds} s`
-
-           let sumDelay = Math.floor(Math.random()  * (105 - 75 + 1)) + 75
-           console.log(`Oczekiwanie przez ${sumDelay} ms...`);
+    let playerOutputField = document.getElementById('playerOutput');
+    let villagesOutputField = document.getElementById('villagesOutput');
+    let currentKey = 0
 
 
-           await checkPlayerVillages(target, attacks[target]);
+    for( target in attacks)
+    {
+        currentKey++
+        let endTime = new Date();
+        let duration = endTime - startTime;
 
-           await new Promise(resolve => setTimeout(resolve, sumDelay));
-       }
+        let durationInSeconds = duration / 1000;
+
+        playerOutputField.value = `Postęp wiosek: ${currentKey}/${keysCount} w ${durationInSeconds} s`
+
+        let sumDelay = Math.floor(Math.random()  * (105 - 75 + 1)) + 75
+        console.log(`Oczekiwanie przez ${sumDelay} ms...`);
+
+
+        await checkPlayerVillages(target, attacks[target]);
+
+        await new Promise(resolve => setTimeout(resolve, sumDelay));
+    }
 
 
 
@@ -99,39 +118,71 @@
     async  function checkPlayerVillages(target, attacks)
     {
 
-            //console.time('program');
+        //console.time('program');
 
-
-            fetch('game.php?screen=info_village&id='+target).then(function (response) {
-        if (response.ok) {
-            return response.text();
-        }
-        throw response;
-    }).then(function (text) {
-        let parser = new DOMParser();
-        let start = text.indexOf(`<div id="commands_outgoings"`)
-        let end = text.indexOf(`report_table`)
-        let htmlString = text.substring(start,end)
-        let doc = parser.parseFromString(htmlString, 'text/html');
-        let tableRows = doc.getElementsByClassName(`command-row`)
-        for(const command of attacks)
-        {
-            let attackerName = command.player
-            let typeOfOrder = command.typeOfOrder
-            let windowEnd = command.timeWindowEnd
-            if (!output[attackerName]) {
-                output[attackerName] = {};
+        fetch('game.php?screen=info_village&id='+target).then(function (response) {
+            if (response.ok) {
+                return response.text();
             }
+            throw response;
+            throw response;
+        }).then(function (text) {
+            let parser = new DOMParser();
+            let start = text.indexOf(`<div id="commands_outgoings"`)
+            let end = text.indexOf(`report_table`)
+            let htmlString = text.substring(start,end)
+            let doc = parser.parseFromString(htmlString, 'text/html');
+            let tableRows = doc.getElementsByClassName(`command-row`)
+
+            // to optimize
+            let doc2 = parser.parseFromString(text, 'text/html');
+            let coord = doc2.querySelector("table.content-border table table td table tbody").children[2].children[1].innerText
+            //
+            for(const command of attacks)
+            {
+                let attackerName = command.player
+                let typeOfOrder = command.typeOfOrder
+                let windowEnd = command.timeWindowEnd
+
+                // TEMP RESOLVE
+
+                if(typeOfOrder == "small")
+                {
+                    typeOfOrder == "big"
+                }
+                //
+
+                if (!output[attackerName]) {
+                    output[attackerName] = {};
+                }
 
 
-            if (!output[attackerName][typeOfOrder]) {
-                output[attackerName][typeOfOrder] = {
-                    'onTime': 0,
-                    'delay': 0,
-                    'bigDelay':0,
-                    'toSend': 0
-                };
-            }
+                if (!output[attackerName][typeOfOrder]) {
+                    output[attackerName][typeOfOrder] = {
+                        'onTime': 0,
+                        'delay': 0,
+                        'bigDelay':0,
+                        'toSend': 0
+                    };
+                }
+
+                if(typeOfOrder == 'offSnob' || typeOfOrder == 'snob' || typeOfOrder == 'big' || typeOfOrder == 'small')
+                {
+                    if (!villagesOutput[target]) {
+                        villagesOutput[target] = {
+                            'coord': coord
+                        };
+                    }
+
+
+                    if (!villagesOutput[target][typeOfOrder]) {
+                        villagesOutput[target][typeOfOrder] = {
+                            'send': 0,
+                            'toSend': 0,
+                        };
+                    }
+                    villagesOutput[target][typeOfOrder]["toSend"]++
+                }
 
                 let find = false
 
@@ -140,49 +191,55 @@
                     const playerName = player[0].innerHTML.trim().split(':')[0]
 
 
-                        if(attackerName == playerName && !find)
-                        {
-                            const iconContainer = tableRow.querySelectorAll('.icon-container')[0];
+                    if(attackerName == playerName && !find)
+                    {
+                        const iconContainer = tableRow.querySelectorAll('.icon-container')[0];
 
 
-                            const attackSmallImg = iconContainer.querySelector('img[src*="attack_small"]');
-                            const attackMediumImg = iconContainer.querySelector('img[src*="attack_medium"]');
-                            const attackLargeImg = iconContainer.querySelector('img[src*="attack_large"]');
-                            const snobImg = iconContainer.querySelector('img[src*="snob"]');
+                        const attackSmallImg = iconContainer.querySelector('img[src*="attack_small"]');
+                        const attackMediumImg = iconContainer.querySelector('img[src*="attack_medium"]');
+                        const attackLargeImg = iconContainer.querySelector('img[src*="attack_large"]');
+                        const snobImg = iconContainer.querySelector('img[src*="snob"]');
 
-                            let thisAttackType = 'undefinied'
+                        let thisAttackType = 'undefinied'
 
-                            if (attackSmallImg) {
-                                thisAttackType = 'attack_small';
-                            } else if (attackMediumImg) {
-                                thisAttackType = 'attack_medium';
-                            } else if (attackLargeImg) {
-                                thisAttackType = 'attack_large';
-                            }
-                            if (snobImg) {
-                                thisAttackType += ',snob';
-                            }
-                            // if undefinied = support
-                            if(attacksType[thisAttackType].name == typeOfOrder)
-                            {
-
-                                const spanWithCommandTime = tableRow.querySelector('span[data-endtime]');
-                                const commandTime = spanWithCommandTime.getAttribute('data-endtime')
-
-                                if(commandTime < windowEnd)
-                                {
-                                    output[attackerName][typeOfOrder]['onTime']++
-                                } else if(commandTime < windowEnd + delay){
-                                    output[attackerName][typeOfOrder]['delay']++
-                                } else {
-                                    output[attackerName][typeOfOrder]['bigDelay']++
-                                }
-
-                                find = true
-                                tableRow.remove()
-                            }
-
+                        if (attackSmallImg) {
+                            thisAttackType = 'attack_small';
+                        } else if (attackMediumImg) {
+                            //TEMP RESOLVE
+                            thisAttackType = 'attack_large';
+                            //
+                        } else if (attackLargeImg) {
+                            thisAttackType = 'attack_large';
                         }
+                        if (snobImg) {
+                            thisAttackType += ',snob';
+                        }
+                        // if undefinied = support or own command
+                        if(attacksType[thisAttackType].name == typeOfOrder)
+                        {
+
+                            const spanWithCommandTime = tableRow.querySelector('span[data-endtime]');
+                            const commandTime = spanWithCommandTime.getAttribute('data-endtime')
+
+                            if(commandTime < windowEnd)
+                            {
+                                output[attackerName][typeOfOrder]['onTime']++
+                            } else if(commandTime < windowEnd + delay){
+                                output[attackerName][typeOfOrder]['delay']++
+                            } else {
+                                output[attackerName][typeOfOrder]['bigDelay']++
+                            }
+
+                            if(typeOfOrder == 'offSnob' || typeOfOrder == 'snob' || typeOfOrder == 'big' || typeOfOrder == 'small')
+                                villagesOutput[target][typeOfOrder]["send"]++
+
+                            find = true
+                            tableRow.remove()
+                        }
+
+
+                    }
 
 
 
@@ -191,52 +248,170 @@
 
 
 
-        }
-    })
-            //console.timeEnd('program');
+            }
+        })
+        //console.timeEnd('program');
 
     }
 
 
-
-
-
-
-
-        /////
-        setTimeout(() => {
-        let sumOutput = `([color=#00ff00]OK[/color] [color=#8d8d55]Małe opóźnienie[/color] [color=#fca503]Duże opóźnienie[/color] [color=#ff0000]Brak wysyłki[/color])
-    `
-    for(let player in output)
+    /////
+    setTimeout(() => {
+        let sumOutput = `([color=#0eae0e]OK[/color] [color=#8d8d55]Małe opóźnienie[/color] [color=#fca503]Duże opóźnienie[/color] [color=#ff0000]Brak wysyłki[/color])
+`
+        let sumOutputLate = ``
+        for(let player in output)
         {
             let calculatedOutput = ''
-            let sumSend = 0;
-            let sumToSend = 0;
+            let sumSend = 0
+            let sumToSend = 0
+            let sumDelayed = 0
             let playerAttacks = output[player]
+            let color = ''
+            let notFakeSum = 0
 
-        for (let attackType in playerAttacks)
+            for (let attackType in playerAttacks)
             {
                 let onTime = playerAttacks[attackType]['onTime']
                 let delay = playerAttacks[attackType]['delay']
                 let bigDelay = playerAttacks[attackType]['bigDelay']
                 let toSend = playerAttacks[attackType]['toSend']
                 let sumSendType = onTime + delay + bigDelay
-                let attackTypeTT = attacksTypeTextTranslation[attackType]
-                sumSend +=sumSendType
-                sumToSend += toSend
 
-                calculatedOutput += `${attackTypeTT} - ${sumSendType}/${toSend} ([color=#00ff00]${onTime}[/color] [color=#8d8d55]${delay}[/color] [color=#fca503]${bigDelay}[/color] [color=#ff0000]${toSend-sumSendType}[/color]) \n`
+                if(attackType!="fake")
+                {
+                    sumDelayed += delay + bigDelay
+                    notFakeSum += sumSendType
+                }
+
+                let attackTypeTT = attacksTypeTextTranslation[attackType]
+                sumSend += sumSendType
+                sumToSend += toSend
+                calculatedOutput += `${attackTypeTT} - ${sumSendType}/${toSend} ([color=#${colorGreen}]${onTime}[/color] [color=#${colorGrey}]${delay}[/color] [color=#${colorOrange}]${bigDelay}[/color] [color=#${colorRed}]${toSend-sumSendType}[/color])\n`
 
 
             }
             let percentage = ((sumSend / sumToSend) * 100).toFixed(2)
-        sumOutput += `[player]${player}[/player] wysłał ${sumSend} z ${sumToSend} rozkazów ([b]${percentage}%[/b]) \n  ${calculatedOutput} \n`
+            switch (true) {
+                case (percentage > 90):
+                    color = colorGreen;
+                    break;
+                case (percentage <= 90 && percentage > 80):
+                    color = colorOrange;
+                    break;
+                default:
+                    color = colorRed;
+                    break;
+            }
+            let delayedPercentage = 0
+            if(notFakeSum != 0)
+                delayedPercentage = ((sumDelayed / notFakeSum) * 100).toFixed(2)
 
+            let delayedColor = ''
+            switch (true) {
+                case (delayedPercentage < 10):
+                    delayedColor = colorGreen;
+                    break;
+                case (delayedPercentage >= 10 && delayedPercentage < 20):
+                    delayedColor = colorOrange;
+                    break;
+                default:
+                    delayedColor = colorRed;
+                    break;
+            }
+            let temp = `[player]${player}[/player] wysłał ${sumSend} z ${sumToSend} rozkazów ([color=#${color}][b]${percentage}%[/b][/color]) z czego ${sumDelayed} spóźnionych ([color=#${delayedColor}][b]${delayedPercentage}%[/b][/color]) offów lub grubych
+${calculatedOutput} \n\n`
+
+            if(percentage > 90)
+            {
+                sumOutput += temp
+            } else {
+
+                sumOutputLate += temp
+            }
         }
 
-    html= '<head></head><body><p><h2>Tribe data</h2></p><p><textarea readonly=true style="width: 50vw; height: 80vh">'+sumOutput+'</textarea></p></body>';
 
-        Dialog.show("Tribe data", html);
-    },1000)
+
+        //Villages Output
+
+        let sumVillagesOutput = `Wysłane/łącznie do wysłania\n`
+        for(let village in villagesOutput)
+        {
+            let calculatedOutput = ''
+            let sumSend = 0;
+            let sumToSend = 0;
+            let coord = ''
+            let villageAttacks = villagesOutput[village]
+
+
+
+            for (let villageAttackType in villageAttacks)
+            {
+                let send = 0;
+                let toSend = 0;
+                if(villageAttackType != 'coord')
+                {
+
+                    let send = villageAttacks[villageAttackType]['send']
+                    let toSend = villageAttacks[villageAttackType]['toSend']
+
+
+                    if(toSend>0)
+                    {
+                        let attackTypeTT = attacksTypeTextTranslation[villageAttackType]
+                        let result = toSend - send
+                        let color = ''
+                        switch (true) {
+                            case (result == 0):
+                                color = colorGreen;
+                                break;
+                            case (result <= 2 && result > 0):
+                                color = colorOrange;
+                                break;
+                            default:
+                                color = colorRed;
+                                break;
+                        }
+                        calculatedOutput += `${attackTypeTT} - ${send}/${toSend} ([color=#${color}]${result}[/color])\n`
+                        sumSend += send
+                        sumToSend += toSend
+                    }
+
+                } else {
+                    coord = villageAttacks[villageAttackType]
+                }
+
+
+
+
+            }
+
+
+
+
+            if(sumToSend>0)
+            {
+                let percentage = ((sumSend / sumToSend) * 100).toFixed(2)
+                let color = ''
+                switch (true) {
+                    case (percentage > 90):
+                        color = colorGreen;
+                        break;
+                    case (percentage <= 90 && percentage > 80):
+                        color = colorOrange;
+                        break;
+                    default:
+                        color = colorRed;
+                        break;
+                }
+                sumVillagesOutput += `${coord} - ${sumSend} z ${sumToSend} rozkazów ([color=#${color}]${percentage}%[/color]) \n  ${calculatedOutput}\n`
+            }
+        }
+
+
+        playerOutputField.value = sumOutput + `\n\n==========================================================================\n\n ` + sumOutputLate
+        villagesOutputField.value = sumVillagesOutput
+    },3000)
 
 }
