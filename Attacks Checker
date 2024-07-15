@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         Attacks Checker v1.2
-// @version      1.2
+// @name         Attacks Checker v1.3
+// @version      1.3
 // @description  Check attacks on villages based on "attacks"
 // @author       Foxtal
 // @match        *.plemiona.pl/game.php*
@@ -10,25 +10,25 @@
 
 /*
 1.1  - add villages list and colors
-1.2 - remove(NOT) (temporary) medium off, add delay percentage, increase output delay
-
+1.2 - remove(NOT WORK) (temporary) medium off, add delay percentage,increase output delay
+1.3 - display villages only with missing attacks, add counter "toEarly" commands, fixed find medium off in large, read checker commands, add addtionals attacks, add summary
 
 TODO:
 konwerter opóźnienia każdego typu ataku
-czytanie komend zbierającego komendy
-
+wyrzucić cofające się ataki
 */
 
 //          Config               //
 
 
 let delay = 1*60*60 // hh*mm*ss
+let toEarlyDelay = 6*60*60 // hh*mm*ss
 
 let colorGreen = '0eae0e'
 let colorGrey = '8d8d55'
 let colorOrange = 'd47e33'
 let colorRed = 'ff0000'
-
+let colorBlack = '000000'
 
 let attacksTypeTextTranslation =
     {
@@ -52,13 +52,9 @@ let attacksType = {
 let attacks =
 
 
-
-
-
-
-//         END Config               //
-
-
+    
+    
+    //         END Config               //
 
 //Global function - init
 let menuRow = document.getElementById("foxtalMenu").children[0]
@@ -76,6 +72,7 @@ menuRow.insertBefore(tr,menuRow.firstChild)
 // Global function - function
 let output = []
 let villagesOutput = []
+let sumAdditionalAttack = 0
 unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
 {
 
@@ -144,13 +141,7 @@ unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
                 let typeOfOrder = command.typeOfOrder
                 let windowEnd = command.timeWindowEnd
 
-                // TEMP RESOLVE
 
-                if(typeOfOrder == "small")
-                {
-                    typeOfOrder == "big"
-                }
-                //
 
                 if (!output[attackerName]) {
                     output[attackerName] = {};
@@ -162,7 +153,9 @@ unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
                         'onTime': 0,
                         'delay': 0,
                         'bigDelay':0,
-                        'toSend': 0
+                        'toEarly': 0,
+                        'toSend': 0,
+                        'additionalAttack': 0
                     };
                 }
 
@@ -185,11 +178,27 @@ unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
                 }
 
                 let find = false
-
+                const rowsToRemove = [];
                 for (const tableRow of tableRows) {
-                    const player = tableRow.querySelectorAll('.quickedit-label')
-                    const playerName = player[0].innerHTML.trim().split(':')[0]
 
+                    const playerDiv = tableRow.querySelectorAll('.quickedit-label')
+                    const playerInfo = playerDiv[0].innerHTML.trim().split(':')
+
+                    let playerName = playerInfo[0]
+                    if(playerInfo.length == 1) {
+                        playerName = TribalWars.getGameData().player.name
+
+                    }
+                    ///// temp resolve
+                    if(playerName == 'Cel Pal x Drwal')
+                    {
+                        playerName = 'cel pal'
+                    } else if(playerName == 'kruku112')
+                    {
+                        playerName = 'kruku112 x Darthir'
+                    }
+
+                    ////
 
                     if(attackerName == playerName && !find)
                     {
@@ -206,24 +215,26 @@ unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
                         if (attackSmallImg) {
                             thisAttackType = 'attack_small';
                         } else if (attackMediumImg) {
-                            //TEMP RESOLVE
-                            thisAttackType = 'attack_large';
-                            //
+                            thisAttackType = 'attack_medium';
                         } else if (attackLargeImg) {
                             thisAttackType = 'attack_large';
                         }
                         if (snobImg) {
                             thisAttackType += ',snob';
                         }
-                        // if undefinied = support or own command
-                        if(attacksType[thisAttackType].name == typeOfOrder)
+                        // if undefinied = support command
+                        if(thisAttackType == 'undefinied')
+                        console.log(iconContainer)
+                        if(thisAttackType != 'undefinied' && attacksType[thisAttackType].name == typeOfOrder)
                         {
 
                             const spanWithCommandTime = tableRow.querySelector('span[data-endtime]');
                             const commandTime = spanWithCommandTime.getAttribute('data-endtime')
 
-                            if(commandTime < windowEnd)
+                            if(commandTime < windowEnd - toEarlyDelay)
                             {
+                                output[attackerName][typeOfOrder]['toEarly']++
+                            } else if(commandTime < windowEnd ){
                                 output[attackerName][typeOfOrder]['onTime']++
                             } else if(commandTime < windowEnd + delay){
                                 output[attackerName][typeOfOrder]['delay']++
@@ -235,20 +246,175 @@ unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
                                 villagesOutput[target][typeOfOrder]["send"]++
 
                             find = true
-                            tableRow.remove()
+                            rowsToRemove.push(tableRow);
+
+
+
                         }
 
 
                     }
 
+                }
+
+                for (const row of rowsToRemove) {
+                    row.remove();
+                }
+                // find medium attack in large
+
+                if(!find && (typeOfOrder == attacksType['attack_medium'].name || (typeOfOrder == attacksType['attack_medium,snob'].name))) {
+
+                    for (const tableRow of tableRows) {
+                        const playerDiv = tableRow.querySelectorAll('.quickedit-label')
+                        const playerInfo = playerDiv[0].innerHTML.trim().split(':')
+
+                        let playerName = playerInfo[0]
+                        if(playerInfo.length == 1) {
+                            playerName = TribalWars.getGameData().player.name
+
+                        }
+                        if(playerName == 'Cel Pal x Drwal')
+                        {
+                            playerName = 'cel pal'
+                        } else if(playerName == 'kruku112')
+                        {
+                            playerName = 'kruku112 x Darthir'
+                        }
 
 
+                        if(attackerName == playerName && !find)
+                        {
+                            const iconContainer = tableRow.querySelectorAll('.icon-container')[0];
+                            const attackLargeImg = iconContainer.querySelector('img[src*="attack_large"]');
+                            const snobImg = iconContainer.querySelector('img[src*="snob"]');
+
+                            let thisAttackType = 'undefinied'
+
+                            if (attackLargeImg) {
+                                thisAttackType = 'attack_medium';
+                                if (snobImg) {
+                                    thisAttackType += ',snob';
+                                }
+                            }
+
+                            // if undefinied = support or own command
+                            if(thisAttackType == 'undefinied')
+                                console.log(iconContainer)
+                            if(thisAttackType != 'undefinied' && attacksType[thisAttackType].name == typeOfOrder)
+                            {
+
+                                const spanWithCommandTime = tableRow.querySelector('span[data-endtime]');
+                                const commandTime = spanWithCommandTime.getAttribute('data-endtime')
+
+                                if(commandTime < windowEnd - toEarlyDelay)
+                                {
+                                    output[attackerName][typeOfOrder]['toEarly']++
+                                } else if(commandTime < windowEnd ){
+                                    output[attackerName][typeOfOrder]['onTime']++
+                                } else if(commandTime < windowEnd + delay){
+                                    output[attackerName][typeOfOrder]['delay']++
+                                } else {
+                                    output[attackerName][typeOfOrder]['bigDelay']++
+                                }
+
+                                if(typeOfOrder == 'offSnob' || typeOfOrder == 'snob' || typeOfOrder == 'big' || typeOfOrder == 'small')
+                                    villagesOutput[target][typeOfOrder]["send"]++
+
+                                find = true
+                                tableRow.remove()
+
+                            }
+
+
+                        }
+                    }
                 }
                 output[attackerName][typeOfOrder]['toSend']++
 
 
+            }
+            // remanings commands
+
+
+            for (const tableRow of tableRows) {
+
+                const playerDiv = tableRow.querySelectorAll('.quickedit-label')
+                const playerInfo = playerDiv[0].innerHTML.trim().split(':')
+
+                let playerName = playerInfo[0]
+                if(playerInfo.length == 1) {
+                    playerName = TribalWars.getGameData().player.name
+
+                }
+                ///// temp resolve
+                if(playerName == 'Cel Pal x Drwal')
+                {
+                    playerName = 'cel pal'
+                } else if(playerName == 'kruku112')
+                {
+                    playerName = 'kruku112 x Darthir'
+                }
+
+
+                ////
+
+                const iconContainer = tableRow.querySelectorAll('.icon-container')[0];
+
+                const attackSmallImg = iconContainer.querySelector('img[src*="attack_small"]');
+                const attackMediumImg = iconContainer.querySelector('img[src*="attack_medium"]');
+                const attackLargeImg = iconContainer.querySelector('img[src*="attack_large"]');
+                const snobImg = iconContainer.querySelector('img[src*="snob"]');
+
+                let thisAttackType = 'undefinied'
+
+                if (attackSmallImg) {
+                    thisAttackType = 'attack_small';
+                } else if (attackMediumImg) {
+                    thisAttackType = 'attack_medium';
+                } else if (attackLargeImg) {
+                    thisAttackType = 'attack_large';
+                }
+
+
+                    // disable atm
+                    /*
+                        if (snobImg) {
+                            thisAttackType += ',snob';
+                        }
+                       */
+                //temp
+                let attackerName = playerName
+
+
+                if(thisAttackType != 'undefinied')
+                {
+                    let typeOfOrder=attacksType[thisAttackType].name
+
+                    if (!output[attackerName]) {
+                        output[attackerName] = {};
+                    }
+
+                        if (!output[attackerName][typeOfOrder]) {
+                            output[attackerName][typeOfOrder] = {
+                                'onTime': 0,
+                                'delay': 0,
+                                'bigDelay':0,
+                                'toEarly': 0,
+                                'toSend': 0,
+                                'additionalAttack': 0
+                            };
+                        }
+
+
+                    output[playerName][typeOfOrder]['additionalAttack']++
+                    sumAdditionalAttack++
+
+
+                    }
 
             }
+
+
         })
         //console.timeEnd('program');
 
@@ -257,7 +423,7 @@ unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
 
     /////
     setTimeout(() => {
-        let sumOutput = `([color=#0eae0e]OK[/color] [color=#8d8d55]Małe opóźnienie[/color] [color=#fca503]Duże opóźnienie[/color] [color=#ff0000]Brak wysyłki[/color])
+        let sumOutput = `([color=#${colorGreen}]OK[/color] [color=#${colorGrey}]Małe opóźnienie[/color] [color=#${colorOrange}]Duże opóźnienie[/color] [color=#${colorBlack}]Za wcześnie[/color] [color=#${colorRed}]Brak wysyłki[/color]) ataki spoza rozpiski
 `
         let sumOutputLate = ``
         for(let player in output)
@@ -269,25 +435,30 @@ unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
             let playerAttacks = output[player]
             let color = ''
             let notFakeSum = 0
+            let sumAdditionalAttacks = 0
 
             for (let attackType in playerAttacks)
             {
                 let onTime = playerAttacks[attackType]['onTime']
                 let delay = playerAttacks[attackType]['delay']
                 let bigDelay = playerAttacks[attackType]['bigDelay']
+                let toEarly = playerAttacks[attackType]['toEarly']
                 let toSend = playerAttacks[attackType]['toSend']
-                let sumSendType = onTime + delay + bigDelay
+                let additionalAttack = playerAttacks[attackType]['additionalAttack']
+
+                let sumSendType = onTime + delay + bigDelay + toEarly
 
                 if(attackType!="fake")
                 {
-                    sumDelayed += delay + bigDelay
+                    sumDelayed += delay + bigDelay + toEarly
                     notFakeSum += sumSendType
                 }
 
                 let attackTypeTT = attacksTypeTextTranslation[attackType]
+                sumAdditionalAttacks += additionalAttack
                 sumSend += sumSendType
                 sumToSend += toSend
-                calculatedOutput += `${attackTypeTT} - ${sumSendType}/${toSend} ([color=#${colorGreen}]${onTime}[/color] [color=#${colorGrey}]${delay}[/color] [color=#${colorOrange}]${bigDelay}[/color] [color=#${colorRed}]${toSend-sumSendType}[/color])\n`
+                calculatedOutput += `${attackTypeTT} - ${sumSendType}/${toSend} ([color=#${colorGreen}]${onTime}[/color] [color=#${colorGrey}]${delay}[/color] [color=#${colorOrange}]${bigDelay}[/color] [color=#${colorBlack}]${toEarly}[/color] [color=#${colorRed}]${toSend-sumSendType}[/color]) ${additionalAttack}\n`
 
 
             }
@@ -319,8 +490,8 @@ unsafeWindow.foxtalAttacksChecker = async function foxtalAttacksChecker()
                     delayedColor = colorRed;
                     break;
             }
-            let temp = `[player]${player}[/player] wysłał ${sumSend} z ${sumToSend} rozkazów ([color=#${color}][b]${percentage}%[/b][/color]) z czego ${sumDelayed} spóźnionych ([color=#${delayedColor}][b]${delayedPercentage}%[/b][/color]) offów lub grubych
-${calculatedOutput} \n\n`
+            let temp = `[player]${player}[/player] wysłał ${sumSend} z ${sumToSend} rozkazów ([color=#${color}][b]${percentage}%[/b][/color]) z czego ${sumDelayed} spóźnionych/wysłanych za wcześnie ([color=#${delayedColor}][b]${delayedPercentage}%[/b][/color]) offów lub grubych
+${calculatedOutput}[b]${sumAdditionalAttacks}[/b] dodatkowych ataków\n\n `
 
             if(percentage > 90)
             {
@@ -336,6 +507,7 @@ ${calculatedOutput} \n\n`
         //Villages Output
 
         let sumVillagesOutput = `Wysłane/łącznie do wysłania\n`
+        let sumVillagesSendAndToSend = {}
         for(let village in villagesOutput)
         {
             let calculatedOutput = ''
@@ -343,6 +515,7 @@ ${calculatedOutput} \n\n`
             let sumToSend = 0;
             let coord = ''
             let villageAttacks = villagesOutput[village]
+
 
 
 
@@ -355,12 +528,19 @@ ${calculatedOutput} \n\n`
 
                     let send = villageAttacks[villageAttackType]['send']
                     let toSend = villageAttacks[villageAttackType]['toSend']
+                    let result = toSend - send
 
-
+                    if (!sumVillagesSendAndToSend[villageAttackType]) {
+                        sumVillagesSendAndToSend[villageAttackType] = {
+                            'send': 0,
+                            'toSend': 0,
+                        };
+                    }
+                    sumVillagesSendAndToSend[villageAttackType]['send'] += send
+                    sumVillagesSendAndToSend[villageAttackType]['toSend'] += toSend
                     if(toSend>0)
                     {
                         let attackTypeTT = attacksTypeTextTranslation[villageAttackType]
-                        let result = toSend - send
                         let color = ''
                         switch (true) {
                             case (result == 0):
@@ -387,10 +567,9 @@ ${calculatedOutput} \n\n`
 
             }
 
+            let sumResult = sumToSend - sumSend;
 
-
-
-            if(sumToSend>0)
+            if(sumToSend>0 && sumResult > 0)
             {
                 let percentage = ((sumSend / sumToSend) * 100).toFixed(2)
                 let color = ''
@@ -408,10 +587,35 @@ ${calculatedOutput} \n\n`
                 sumVillagesOutput += `${coord} - ${sumSend} z ${sumToSend} rozkazów ([color=#${color}]${percentage}%[/color]) \n  ${calculatedOutput}\n`
             }
         }
+        // sum all commands
+        let villagesOutputHeader = '[i]Podsumowanie wysyłki plemienia:[/i]\n'
+        for (let villageAttackType in sumVillagesSendAndToSend) {
+            if (sumVillagesSendAndToSend.hasOwnProperty(villageAttackType)) {
+                let sumSend = sumVillagesSendAndToSend[villageAttackType]['send']
+                let sumToSend = sumVillagesSendAndToSend[villageAttackType]['toSend']
+                let percentage = ((sumSend / sumToSend) * 100).toFixed(2)
+                 let color = ''
+                 switch (true) {
+                     case (percentage > 90):
+                         color = colorGreen;
+                         break;
+                     case (percentage <= 90 && percentage > 80):
+                         color = colorOrange;
+                         break;
+                     default:
+                         color = colorRed;
+                         break;
+                 }
+                let attackTypeTT = attacksTypeTextTranslation[villageAttackType]
+                villagesOutputHeader += `Typ ataku: [b]${attackTypeTT}[/b]
+wysłano łącznie ${sumSend} na ${sumToSend} ([color=#${color}]${percentage}%[/color])\n\n`
+            }
+        }
+        // sum additional attacks
+        sumAdditionalAttackOutput = `Łączne ataki spoza rozpiski (fejkomat): [b]${sumAdditionalAttack}[/b]`
 
-
-        playerOutputField.value = sumOutput + `\n\n==========================================================================\n\n ` + sumOutputLate
-        villagesOutputField.value = sumVillagesOutput
-    },3000)
+        playerOutputField.value = sumOutput + `\n\n========================================================================\n\n ` + sumOutputLate
+        villagesOutputField.value = villagesOutputHeader + sumAdditionalAttackOutput + "\n\n========================================================================\n\n" + sumVillagesOutput
+    },2500)
 
 }
