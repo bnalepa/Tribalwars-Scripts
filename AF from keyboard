@@ -1,0 +1,26 @@
+// ==UserScript==
+// @name         AF from keyboard
+// @namespace    http://tampermonkey.net/
+// @version      1.00
+// @author       Foxtal
+// @match        *://*.plemiona.pl/game.php?*screen=am_farm*
+// @icon         https://www.google.com/s2/favicons?domain=plemiona.pl
+// ==/UserScript==
+
+
+function sendA()
+{
+$(".farm_icon_a").click();
+}
+
+function sendB()
+{
+$(".farm_icon_b").click();
+}
+
+document.addEventListener('keydown', function(event) {
+   if(event.key == 1)
+        sendA();
+    else if(event.key == 2)
+        sendB();
+});
