@@ -1,0 +1,12 @@
+javascript:
+//by Foxtal
+const buildings = $("#buildings")[0].children[0].children;
+
+buildings[0].innerHTML += "<font size=1>Równoznaczne z kupieniem:"
+
+for (let building of buildings) {
+    if (building.children.length > 2 && building.children[1].innerText != 'Zapotrzebowanie') {
+        suma = parseInt((parseInt(building.children[1].innerText) + parseInt(building.children[2].innerText) + parseInt(building.children[3].innerText)) * 0.2);
+        building.innerHTML += "<font size=1>" + parseInt(suma / 30) + " za 1 PP</font>";
+    }
+};
