@@ -1,0 +1,51 @@
+// ==UserScript==
+// @name         Foxy Places
+// @version      1.0
+// @description  Replace the place with foxes
+// @author       Foxtal
+// @match        *://*.plemiona.pl/game.php?village=*&screen=overview*
+// @icon         https://i.ibb.co/23sx850s/obraz-2025-05-13-135303753.png
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+const place = document.querySelector('.visual-building-place1');
+    if (place) {
+        Object.assign(place.style, {
+            width: '140px',
+            height: '140px',
+            left: '310px',
+            top: '190px',
+            backgroundImage: 'url(https://i.ibb.co/8FT8zdx/Liski.png)',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            position: 'absolute'
+        });
+
+     const placeAnimation = document.querySelector('.anim-building-barracks-prod');
+    if (placeAnimation) {
+        Object.assign(placeAnimation.style, {
+                display: 'none'
+        });
+    }
+
+    const statue = document.querySelector('.visual-building-statue1');
+    if (statue) {
+        Object.assign(statue.style, {
+            width: '75px',
+            height: '92px',
+            left: '277px',
+            top: '218px',
+            backgroundImage: 'url(https://i.ibb.co/ynB5K0zs/Chat-GPT-Image-13-maj-2025-15-48-31.png)',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            position: 'absolute'
+        });
+
+    }
+
+    }
+})();
