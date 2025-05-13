@@ -1,0 +1,28 @@
+// ==UserScript==
+// @name         Nordic Village
+// @version      1.0
+// @description  Replaces building images with a Nordic theme
+// @author       Foxtal
+// @match        *://*.plemiona.pl/game.php?village=*&screen=overview*
+// @icon         https://i.ibb.co/23sx850s/obraz-2025-05-13-135303753.png
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    const building = document.querySelector('.visual-building-church_f1');
+    if (building) {
+        Object.assign(building.style, {
+            width: '128px',
+            height: '120px',
+            left: '415px',
+            top: '125px',
+            backgroundImage: 'url(https://i.ibb.co/wr4wQmpw/obraz-2025-05-13-134312403.png)',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            position: 'absolute'
+        });
+
+    }
+})();
