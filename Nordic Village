@@ -1,18 +1,70 @@
 // ==UserScript==
 // @name         Nordic Village
-// @version      1.0
+// @version      1.3
 // @description  Replaces building images with a Nordic theme
 // @author       Foxtal
-// @match        *://*.plemiona.pl/game.php?village=*&screen=overview*
+// @match        *://*.plemiona.pl/game.php?*screen=overview*
 // @icon         https://i.ibb.co/23sx850s/obraz-2025-05-13-135303753.png
 // ==/UserScript==
 
 (function() {
     'use strict';
 
-    const building = document.querySelector('.visual-building-church_f1');
-    if (building) {
-        Object.assign(building.style, {
+let visualBuildingsToTop_List = `.visual-building-main1, .visual-building-main2, .visual-building-main3,
+.visual-building-snob1,
+.visual-building-wood1, .visual-building-wood2, .visual-building-wood3,
+.visual-building-stone1, .visual-building-stone2, .visual-building-stone3
+
+`
+
+const visualBuildings = document.querySelectorAll(visualBuildingsToTop_List);
+visualBuildings.forEach(building => {
+    Object.assign(building.style, {
+        'z-index': '500'
+    });
+});
+
+const visualLabel = document.querySelectorAll('.visual-label');
+visualLabel.forEach(building => {
+    Object.assign(building.style, {
+        'z-index': '500'
+    });
+});
+ const map = document.querySelector('#map');
+    if (map) {
+        Object.assign(map.style, {
+          'z-index': '999',
+
+        });
+    }
+const links = document.querySelector('.visual-empty');
+    if (links) {
+        Object.assign(links.style, {
+          'z-index': '99999',
+
+        });
+    }
+
+ const wall3 = document.querySelector('.visual-building-wall3');
+    if (wall3) {
+        Object.assign(wall3.style, {
+            width: '660px',
+            height: '660px',
+            top: '-200px',
+            left: '-10px',
+            backgroundImage: 'url(https://i.ibb.co/B5rYQD6F/Jormungandr-Wall.png)',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            position: 'absolute',
+            'z-index': '2',
+            'pointer-events': 'none'
+        });
+    }
+
+const church_f1 = document.querySelector('.visual-building-church_f1');
+    if (church_f1) {
+        Object.assign(church_f1.style, {
             width: '128px',
             height: '120px',
             left: '415px',
@@ -21,8 +73,36 @@
             backgroundPosition: 'center',
             backgroundSize: 'contain',
             backgroundRepeat: 'no-repeat',
-            position: 'absolute'
+            position: 'absolute',
+            'z-index': '500',
         });
 
     }
+
+// Jormungandr Head
+
+    let visualContainer = document.querySelector('.visual');
+let headJormungandrDiv = `<div id="Jormungandr-head" style="z-index: 500;"></div>`;
+
+if (visualContainer) {
+    visualContainer.insertAdjacentHTML('afterbegin', headJormungandrDiv);
+
+
+ const JormungandrHead = document.querySelector('#Jormungandr-head');
+    if (JormungandrHead) {
+        Object.assign(JormungandrHead.style, {
+            width: '660px',
+            height: '660px',
+            top: '10px',
+            backgroundImage: 'url(https://i.ibb.co/1tzqfyFk/Jormungandr-Head.png)',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            position: 'absolute',
+            'z-index': '200',
+            'pointer-events': 'none'
+        });
+    }
+}
+
 })();
