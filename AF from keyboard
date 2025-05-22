@@ -1,26 +1,26 @@
 // ==UserScript==
 // @name         AF from keyboard
 // @namespace    http://tampermonkey.net/
-// @version      1.00
+// @version      1.1
 // @author       Foxtal
 // @match        *://*.plemiona.pl/game.php?*screen=am_farm*
-// @icon         https://www.google.com/s2/favicons?domain=plemiona.pl
+// @icon         https://i.ibb.co/23sx850s/obraz-2025-05-13-135303753.png
 // ==/UserScript==
 
 
 function sendA()
 {
-$(".farm_icon_a").click();
+$(".farm_icon_a")[1].click();
 }
 
 function sendB()
 {
-$(".farm_icon_b").click();
+$(".farm_icon_b")[1].click();
 }
 
 document.addEventListener('keydown', function(event) {
-   if(event.key == 1)
+   if(event.key == 'q')
         sendA();
-    else if(event.key == 2)
+    else if(event.key == 'w')
         sendB();
 });
