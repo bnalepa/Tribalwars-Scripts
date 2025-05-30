@@ -1,26 +1,56 @@
 // ==UserScript==
 // @name         AF from keyboard
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @author       Foxtal
 // @match        *://*.plemiona.pl/game.php?*screen=am_farm*
 // @icon         https://i.ibb.co/23sx850s/obraz-2025-05-13-135303753.png
 // ==/UserScript==
+// 1.1 - limited queries
+// 1.2 - introduce smartSending
+
+// Config - when send A (otherwise send B)
+const config = {
+  isWallQuestionMarkOrZero: true
+};
 
 
-function sendA()
+onInit();
+
+function onInit()
 {
-$(".farm_icon_a")[1].click();
+    $("a.farm_icon_c, a.farm_icon_b, a.farm_icon_a").click(function() {
+        $(this).closest("tr").remove()
+})
+
 }
 
-function sendB()
+function smartSending()
 {
-$(".farm_icon_b")[1].click();
+    console.log("smartSending");
+    let wallLevel = $("#plunder_list tr.row_a, #plunder_list tr.row_b")[0].children[6].innerText;
+
+    if (
+        (config.isWallQuestionMarkOrZero && (wallLevel != "?" && wallLevel != 0))
+    )
+        sendAttack("b");
+    else
+        sendAttack("a");
+
+}
+
+
+function sendAttack(attackLetter)
+{
+    $(".farm_icon_" + attackLetter)[1].click();
+    console.log("send " + attackLetter);
 }
 
 document.addEventListener('keydown', function(event) {
    if(event.key == 'q')
-        sendA();
+        sendAttack("a");
     else if(event.key == 'w')
-        sendB();
+        sendAttack("b");
+    else if(event.key == '`')
+        smartSending();
 });
