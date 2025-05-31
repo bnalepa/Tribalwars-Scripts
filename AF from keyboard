@@ -1,19 +1,29 @@
 // ==UserScript==
 // @name         AF from keyboard
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @author       Foxtal
 // @match        *://*.plemiona.pl/game.php?*screen=am_farm*
 // @icon         https://i.ibb.co/23sx850s/obraz-2025-05-13-135303753.png
 // ==/UserScript==
 // 1.1 - limited queries
 // 1.2 - introduce smartSending
+// 1.3 - add maxLootFlag to smartSending
+
 
 // Config - when send A (otherwise send B)
-const config = {
-  isWallQuestionMarkOrZero: true
+
+const config1 = {
+  isWallQuestionMarkOrZero: true,
+  isMaxLoot: true
 };
 
+const config2 = {
+  isWallQuestionMarkOrZero: true,
+  isMaxLoot: false
+};
+
+////
 
 onInit();
 
@@ -25,13 +35,16 @@ function onInit()
 
 }
 
-function smartSending()
+function smartSending(config)
 {
     console.log("smartSending");
     let wallLevel = $("#plunder_list tr.row_a, #plunder_list tr.row_b")[0].children[6].innerText;
+    let lootImg = $("#plunder_list tr.row_a, #plunder_list tr.row_b")[0].children[2].children[0].src;
+    let maxLootFlag = lootImg.indexOf("max_loot/1") > 0;
 
     if (
-        (config.isWallQuestionMarkOrZero && (wallLevel != "?" && wallLevel != 0))
+        (config.isWallQuestionMarkOrZero && (wallLevel != "?" && wallLevel != 0)
+        || (config.isMaxLoot && maxLootFlag))
     )
         sendAttack("b");
     else
@@ -52,5 +65,7 @@ document.addEventListener('keydown', function(event) {
     else if(event.key == 'w')
         sendAttack("b");
     else if(event.key == '`')
-        smartSending();
+        smartSending(config1);
+    else if(event.key == 'Escape')
+        smartSending(config2);
 });
