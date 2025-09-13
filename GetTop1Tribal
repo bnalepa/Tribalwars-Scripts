@@ -1,0 +1,58 @@
+output = ''
+async function getWorldData(world)
+{
+fetch(`https://pl.twstats.com/${world}/index.php`).then(function (response) {
+            if (response.ok) {
+                return response.text();
+            }
+            throw response;
+        }).then(function (text) {
+
+            let parser = new DOMParser();
+            let start = text.indexOf(`<th>Plemię</th>`)
+            let end = text.indexOf(`<h3>Statystyki</h3>`)
+            let htmlString = text.substring(start,end)
+            let doc = parser.parseFromString(htmlString, 'text/html');
+            let tribalLink = doc.getElementsByTagName("a")[0].href;
+            console.log(tribalLink)
+            getTribalFullName(world, tribalLink);
+
+
+        })
+}
+
+async function getTribalFullName(world, tribalLink)
+{
+    let result = tribalLink.slice(tribalLink.indexOf("index.php"));
+
+fetch(`https://pl.twstats.com/${world}/${result}`).then(function (response) {
+
+            if (response.ok) {
+                return response.text();
+            }
+            throw response;
+        }).then(function (text) {
+
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(text, 'text/html');
+            let tribalFullName = doc.querySelectorAll("table.box:nth-child(1) tr:nth-child(2) td")[2].innerText;
+            output +=  `${world} - ${tribalFullName}
+`
+        })
+}
+
+async function getData(beginWorld, endWorld) {
+let sumDelay = Math.floor(Math.random()  * (105 - 75 + 1)) + 275
+    
+    for(i = beginWorld; i<= endWorld;i++)
+        {
+            console.log(`Oczekiwanie przez ${sumDelay} ms...`);
+            await getWorldData(`pl${i}`)
+             await new Promise(resolve => setTimeout(resolve, sumDelay));
+        sumDelay = Math.floor(Math.random()  * (105 - 75 + 1)) + 285
+        }
+
+console.log(output)
+
+}
+await getData(200,219)
